@@ -16,7 +16,7 @@ class Player{
         this.name = name;
         this.surname = surname;
         this.id = -1;
-        this.occupiedCities = new Set();
+        this.occupiedCities = new Map();
     }
 
 }
@@ -115,19 +115,6 @@ function initMapView(numberOfCities, cityPrimaries){
     let hexagons = [];
     for(let i = 0; i < numberOfCities ; i++){
         let hexagon = new PIXI.Graphics();
-        /*
-        hexagon.beginFill(0xFF0000);
-        hexagon.drawPolygon([
-            -hexagonRadius, 0,
-            -hexagonRadius/2, hexagonHeight/2,
-            hexagonRadius/2, hexagonHeight/2,
-            hexagonRadius, 0,
-            hexagonRadius/2, -hexagonHeight/2,
-            -hexagonRadius/2, -hexagonHeight/2,
-        ])
-        
-        hexagon.endFill();
-        */
         cities.push(new CityClient(i, cityPrimaries[i]));
         if(i < 8){
             hexagon.x = map.x + 240 + 220 * (Math.cos(Math.PI / 4 * i - Math.PI / 8));
@@ -146,19 +133,22 @@ function initMapView(numberOfCities, cityPrimaries){
         hexagon.basicText.x = 0;
         hexagon.basicText.y = 0;
 
-        //hexagon.primary = new 
-
-
         hexagon.changeText = (text) => (hexagon.basicText.text = text);
 
         hexagon.addChild(hexagon.basicText);
         hexagon.on('mousedown', () => {
-            investment.selectedCity = i;
-            selectionText.text = "You selected City" + i + " whose primary promise is "+ cities[i].primary;
+
+
+            if(occupiedCities.has(i)){
+                investment.selectedCity = -1;
+                selectionText.text = "Your own city";
+
+            } else {
+                investment.selectedCity = i;
+                selectionText.text = "You selected City" + i + " whose primary promise is "+ cities[i].primary;
+            }
 
             // Since city is changed, reset the investments
-
-            
             arrayAssign(player.promisesInitial, player.promisesLeft);
             investment.promise = [0, 0, 0];
             resetUI();
@@ -192,15 +182,6 @@ function resetUI(){
     transportText.text = "Transportation Promises Left: " + player.promisesLeft[2];   
 }
 
-function arrayAssign(from, to){
-    if(from.length != to.length){
-        throw("Sizes do not match");
-    }
-
-    from.forEach((_, i)=>{
-        to[i] = from[i];
-    })
-}
 
 socket.emit('new user', {name: player.name, surname: player.surname});
 
@@ -219,23 +200,68 @@ socket.on('welcome', (data) => {
 
 });
 
-socket.on('results ready', (cityOwnerships) => {
+socket.on('results ready', (outcome) => {
     let capturedCity = -1;
+    console.log(outcome);
+    let cityOwnerShips = outcome.cityOwnerShips;
+    let lostCities = outcome.lostCities;
     hexagons.forEach((hexagon, i) => {
-        hexagon.basicText.text = "User # " + cityOwnerships[i];
-        if(capturedCity == -1 && cityOwnerships[i] == player.id){
+        if(cityOwnerShips[i] != -1)
+            hexagon.changeText("# " + cityOwnerShips[i]);
+        else
+            hexagon.changeText("Emp");
+        if(capturedCity == -1 && cityOwnerShips[i] == player.id){
             capturedCity = i;
         }
     });
     setButtonActive(true);
     //console.log(result);
     if(capturedCity != -1){
+
+        let investedPromises = diffArray(player.promisesInitial, player.promisesLeft);
+        player.occupiedCities.set(capturedCity, investedPromises);
         arrayAssign(player.promisesLeft, player.promisesInitial);
-        player.occupiedCities.add(capturedCity);
         console.log("I won the City # " + capturedCity + " in this turn");
     } else {
         arrayAssign(player.promisesInitial, player.promisesLeft);
         console.log("I could not win any city in this turn");
-        resetUI();
     }
+
+    // TODO: Bring cities as well
+    if(lostCities[player.id].lost){
+        let returnedPromises = lostCities[player.id].returnedPromises;
+        player.promisesInitial[0] += returnedPromises[0];
+        player.promisesInitial[1] += returnedPromises[1];
+        player.promisesInitial[2] += returnedPromises[2];
+        arrayAssign(player.promisesInitial, player.promisesLeft);
+
+        // Deoccupy the lost citie
+        lostCities[player.id].cities.forEach((city)=>{
+            player.occupiedCities.delete(city);
+        });
+        console.log("I lost some cities");
+    }
+
+    resetUI();
 })
+
+function arrayAssign(from, to){
+    if(from.length != to.length){
+        throw("Sizes do not match");
+    }
+
+    from.forEach((_, i)=>{
+        to[i] = from[i];
+    })
+}
+
+function diffArray(x, y){
+    if(x.length != y.length){
+        throw("Sizes do not match");
+    }
+    let result = [];
+    x.forEach((_, i)=>{
+        result.push(x[i] - y[i]);
+    })
+    return result;
+}
