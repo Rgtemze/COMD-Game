@@ -67,6 +67,7 @@ class GameController{
         this.playersAwaited--;
         this.players[investment.id].promises = investment.promise;
         this.players[investment.id].selectedCity = investment.selectedCity;
+        this.players[investment.id].isOwn = investment.isOwn;
 
         if(this.playersAwaited == 0){
             this.processTurn();
@@ -97,6 +98,7 @@ class GameController{
             results.push([]);
         }
 
+        // Check player's scores for each city.
         this.players.forEach(player => {
             let city = player.selectedCity;
             let sum = this.calculateScore(player.promises, this.cities[city].primaryPromise);
@@ -142,7 +144,6 @@ class GameController{
                     if(oldOwner != -1){
                         lostCities[oldOwner].lost = true;
                         lostCities[oldOwner].cities.push(city);
-                        //arrayAssign(cityObj.promises, lostCities[oldOwner].returnedPromises);
                         this.addSumToFirstArray( lostCities[oldOwner].returnedPromises, cityObj.promises);
                         console.log("Returned promises");
                         console.log(lostCities[oldOwner].returnedPromises);
@@ -164,6 +165,19 @@ class GameController{
             }
         });
 
+
+        // Check if there are cities given up.
+        this.players.forEach(player => {
+
+            let city = player.selectedCity;
+            if(!player.isOwn || this.cityOwnerShips[city] != player.id) return;
+            lostCities[player.id].lost = true;
+            lostCities[player.id].cities.push(city);
+            this.addSumToFirstArray(lostCities[player.id].returnedPromises, this.cities[city].promises);
+            this.cityOwnerShips[city] = -1; 
+            arrayAssign(player.promises, this.cities[city].promises);
+        });
+        
         let outcome = {cityOwnerShips: this.cityOwnerShips, lostCities: lostCities}
 
         this.nextTurn(outcome);
@@ -206,6 +220,7 @@ class PlayerData{
         this.surname = surname;
         this.promises = [0, 0, 0];
         this.selectedCity = -1;
+        this.isOwn = false;
     }
 
 }

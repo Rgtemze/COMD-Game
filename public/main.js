@@ -25,6 +25,7 @@ class Investment{
         this.id = -1;
         this.promise = [0,0,0];
         this.selectedCity = -1;
+        this.isOwn = false;
     }
 }
 
@@ -84,7 +85,7 @@ function initUI(){
         let index = i;
         value.interactive = true;
         value.on('mousedown', ()=>{
-            if(investment.selectedCity == -1 || player.promisesLeft[index] == 0) return;
+            if(investment.selectedCity == -1 || player.promisesLeft[index] == 0 || investment.isOwn) return;
             player.promisesLeft[index]--;
             investment.promise[index]++;
             resetUI();
@@ -142,13 +143,13 @@ function initMapView(numberOfCities, cityPrimaries){
         hexagon.addChild(hexagon.basicText);
         hexagon.on('mousedown', () => {
 
-
+            investment.selectedCity = i;
             if(player.occupiedCities.has(i)){
-                investment.selectedCity = -1;
+                investment.isOwn = true;
                 selectionText.text = "Your own city";
 
             } else {
-                investment.selectedCity = i;
+                investment.isOwn = false;
                 selectionText.text = "You selected City" + i + " whose primary promise is "+ cities[i].primary;
             }
 
