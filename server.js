@@ -86,9 +86,11 @@ class GameController{
         return sum;
     }
 
+
+    // Calculate whom wins or losts what.
     processTurn(){
         
-        console.log("Turn calculated");
+        console.log("\nNew Turn\n");
 
         let results = []; // This must be as much as number of cities
         for(let i = 0; i < this.numberOfCities; i++){
@@ -140,10 +142,15 @@ class GameController{
                     if(oldOwner != -1){
                         lostCities[oldOwner].lost = true;
                         lostCities[oldOwner].cities.push(city);
-                        arrayAssign(cityObj.promises, lostCities[oldOwner].returnedPromises);
+                        //arrayAssign(cityObj.promises, lostCities[oldOwner].returnedPromises);
+                        this.addSumToFirstArray( lostCities[oldOwner].returnedPromises, cityObj.promises);
+                        console.log("Returned promises");
+                        console.log(lostCities[oldOwner].returnedPromises);
+                        console.log("City promises");
+                        console.log(cityObj.promises);
                     }
-                    cityObj.owner = ownerId;
                     arrayAssign(this.players[ownerId].promises, cityObj.promises);
+                    cityObj.owner = ownerId;
                 } else {
                     ownerId = -1;
                 }
@@ -161,6 +168,16 @@ class GameController{
 
         this.nextTurn(outcome);
 
+    }
+
+    addSumToFirstArray(from, to){
+        if(from.length != to.length){
+            throw("Sizes do not match!");
+        }
+
+        for(let i = 0; i < from.length; i++){
+            from[i] += to[i];
+        }
     }
 
 }

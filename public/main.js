@@ -48,9 +48,13 @@ let cities = [];
 function initUI(){
     button.interactive = true;
     button.on('mousedown', () => {
-        socket.emit('investment', investment);
+
         console.log(investment);
         console.log(player);
+        if(investment.selectedCity == -1){
+            return;
+        }
+        socket.emit('investment', investment);
         investment.selectedCity = -1;
         selectionText.text = "You did not select any city!";
         investment.promise = [0, 0, 0];
@@ -139,7 +143,7 @@ function initMapView(numberOfCities, cityPrimaries){
         hexagon.on('mousedown', () => {
 
 
-            if(occupiedCities.has(i)){
+            if(player.occupiedCities.has(i)){
                 investment.selectedCity = -1;
                 selectionText.text = "Your own city";
 
@@ -210,19 +214,20 @@ socket.on('results ready', (outcome) => {
             hexagon.changeText("# " + cityOwnerShips[i]);
         else
             hexagon.changeText("Emp");
-        if(capturedCity == -1 && cityOwnerShips[i] == player.id){
+        if(capturedCity == -1 && cityOwnerShips[i] == player.id && !player.occupiedCities.has(i) ){
             capturedCity = i;
         }
     });
     setButtonActive(true);
-    //console.log(result);
-    if(capturedCity != -1){
+    console.log(capturedCity);
+    console.log(player.occupiedCities.has(capturedCity));
+    if(capturedCity != -1){ // If it is newly acquired.
 
         let investedPromises = diffArray(player.promisesInitial, player.promisesLeft);
         player.occupiedCities.set(capturedCity, investedPromises);
         arrayAssign(player.promisesLeft, player.promisesInitial);
         console.log("I won the City # " + capturedCity + " in this turn");
-    } else {
+    } else if(capturedCity == -1){
         arrayAssign(player.promisesInitial, player.promisesLeft);
         console.log("I could not win any city in this turn");
     }
@@ -238,10 +243,10 @@ socket.on('results ready', (outcome) => {
         // Deoccupy the lost citie
         lostCities[player.id].cities.forEach((city)=>{
             player.occupiedCities.delete(city);
+            console.log("I lost City # " + city);
         });
-        console.log("I lost some cities");
     }
-
+    console.log(player);
     resetUI();
 })
 
