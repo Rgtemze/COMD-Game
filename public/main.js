@@ -63,19 +63,19 @@ function initUI(){
         setButtonActive(false);
     });
 
-    eduText.x = 600;
+    eduText.x = 800;
     eduText.y = 150;
     app.stage.addChild(eduText);
 
-    healthText.x = 600;
+    healthText.x = 800;
     healthText.y = 200;
     app.stage.addChild(healthText);
 
-    transportText.x = 600;
+    transportText.x = 800;
     transportText.y = 250;
     app.stage.addChild(transportText);
 
-    selectionText.x = 600;
+    selectionText.x = 800;
     selectionText.y = 50;
     app.stage.addChild(selectionText);
 
@@ -142,15 +142,22 @@ function initMapView(numberOfCities, cityPrimaries){
 
         hexagon.addChild(hexagon.basicText);
         hexagon.on('mousedown', () => {
+            
 
+            if(!canGo(i)){
+                investment.selectedCity = -1;
+                selectionText.text = "You cannot select that city!";
+                return;
+            }
             investment.selectedCity = i;
             if(player.occupiedCities.has(i)){
                 investment.isOwn = true;
-                selectionText.text = "Your own city";
+                let promises = player.occupiedCities.get(i);
+                selectionText.text = `Your own city with promises [${promises[0]}, ${promises[1]}, ${promises[2]}]`;
 
             } else {
                 investment.isOwn = false;
-                selectionText.text = "You selected City" + i + " whose primary promise is "+ cities[i].primary;
+                selectionText.text = `You selected City ${i} whose primary promise is ${cities[i].primary}`;
             }
 
             // Since city is changed, reset the investments
@@ -165,15 +172,21 @@ function initMapView(numberOfCities, cityPrimaries){
     return hexagons;
 }
 
-function canGo(from, to){
+function canGo(to){
+    if(to < 8){
+        return true;
+    }
+    else if(to == 8 && (player.occupiedCities.has(0) || player.occupiedCities.has(7) || player.occupiedCities.has(1))){
+        return true;
+    } else if(to == 9 && (player.occupiedCities.has(1) || player.occupiedCities.has(2) || player.occupiedCities.has(3))){
+        return true;
+    } else if(to == 10 && (player.occupiedCities.has(3) || player.occupiedCities.has(4) || player.occupiedCities.has(5))){
+        return true;
+    } else if(to == 11 && (player.occupiedCities.has(5) || player.occupiedCities.has(6) || player.occupiedCities.has(7))){
+        return true;
+    } else if(to == 12 && (player.occupiedCities.has(8) || player.occupiedCities.has(9) 
+        || player.occupiedCities.has(10) || player.occupiedCities.has(11))){
 
-    if(to == 8 && (from == 0 || from == 7 || from == 1)){
-        return true;
-    } else if(to == 9 && (from == 1 || from == 2 || from == 3)){
-        return true;
-    } else if(to == 10 && (from == 3 || from == 4 || from == 5)){
-        return true;
-    } else if(to == 11 && (from == 5 || from == 6 || from == 7)){
         return true;
     }
 
@@ -211,11 +224,11 @@ socket.on('results ready', (outcome) => {
     let cityOwnerShips = outcome.cityOwnerShips;
     let lostCities = outcome.lostCities;
     hexagons.forEach((hexagon, i) => {
-        if(cityOwnerShips[i] != -1)
-            hexagon.changeText("# " + cityOwnerShips[i]);
+        if(cityOwnerShips[i].owner != -1)
+            hexagon.changeText("Owner: #" + cityOwnerShips[i].owner + "\n Score: " + cityOwnerShips[i].score);
         else
             hexagon.changeText("Emp");
-        if(capturedCity == -1 && cityOwnerShips[i] == player.id && !player.occupiedCities.has(i) ){
+        if(capturedCity == -1 && cityOwnerShips[i].owner == player.id && !player.occupiedCities.has(i) ){
             capturedCity = i;
         }
     });

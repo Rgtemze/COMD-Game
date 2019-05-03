@@ -46,7 +46,7 @@ class GameController{
         for(let i = 0; i < this.numberOfCities; i++){
             let city = new City("Adana" + i);
             this.cities.push(city);
-            this.cityOwnerShips.push(-1);
+            this.cityOwnerShips.push({owner: -1, score: 0});
         }
         this.playerNo = 0;
     }
@@ -101,6 +101,8 @@ class GameController{
         // Check player's scores for each city.
         this.players.forEach(player => {
             let city = player.selectedCity;
+            console.log(city);
+            console.log(this.cities[city]);
             let sum = this.calculateScore(player.promises, this.cities[city].primaryPromise);
             results[city].push({id: player.id, sum: sum});
             console.log("Player: " + player.id + " had score " + sum + " in the City # " + city);
@@ -130,12 +132,12 @@ class GameController{
                     return;
                 }
             });
-            
+            let cityObj = this.cities[city];
+
             // If there is a winner, it is guaranteed that s/he is unique.
             if(ownerId != -1){
 
-                let cityObj = this.cities[city];
-                let cityScore = this.calculateScore(cityObj.promises, cityObj.primaryPromise);
+                let cityScore = cityObj.score;//this.calculateScore(cityObj.promises, cityObj.primaryPromise);
                 let oldOwner;
                 if(max > cityScore){
                     oldOwner = cityObj.owner;
@@ -151,6 +153,7 @@ class GameController{
                         console.log(cityObj.promises);
                     }
                     arrayAssign(this.players[ownerId].promises, cityObj.promises);
+                    cityObj.score = max;
                     cityObj.owner = ownerId;
                 } else {
                     ownerId = -1;
@@ -161,7 +164,8 @@ class GameController{
             console.log("City # " + city + " goes to " + ownerId);
 
             if(ownerId != -1){
-                this.cityOwnerShips[city] = ownerId;
+                this.cityOwnerShips[city].owner = ownerId;
+                this.cityOwnerShips[city].score = cityObj.score;
             }
         });
 
@@ -170,11 +174,11 @@ class GameController{
         this.players.forEach(player => {
 
             let city = player.selectedCity;
-            if(!player.isOwn || this.cityOwnerShips[city] != player.id) return;
+            if(!player.isOwn || this.cityOwnerShips[city].owner != player.id) return;
             lostCities[player.id].lost = true;
             lostCities[player.id].cities.push(city);
             this.addSumToFirstArray(lostCities[player.id].returnedPromises, this.cities[city].promises);
-            this.cityOwnerShips[city] = -1; 
+            this.cityOwnerShips[city].owner = -1; 
             arrayAssign(player.promises, this.cities[city].promises);
         });
         
@@ -200,6 +204,7 @@ class City{
         this.name = name;
         this.promises = [0, 0, 0];
         this.primaryPromise = Math.floor(Math.random() * 3);
+        this.score = 0;
         this.owner = -1;
     }
 
