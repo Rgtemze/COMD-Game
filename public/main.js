@@ -17,6 +17,7 @@ class Player{
         this.surname = surname;
         this.id = -1;
         this.occupiedCities = new Map();
+        this.totalPop = 0;
     }
 
 }
@@ -30,9 +31,10 @@ class Investment{
 }
 
 class CityClient{
-    constructor(id, primary){
+    constructor(id, primary, population){
         this.id = id;
         this.primary = primary;
+        this.population = population;
     }
 }
 
@@ -44,9 +46,16 @@ let eduText = new PIXI.Text("Education Promises Left: " + player.promisesLeft[0]
 let healthText = new PIXI.Text("Health Promises Left: " + player.promisesLeft[1]);
 let transportText = new PIXI.Text("Transportation Promises Left: " + player.promisesLeft[2]);
 let selectionText = new PIXI.Text("You did not select any city!");
+let turnText = new PIXI.Text("Turn # 1");
+let playerText = new PIXI.Text("You are Player # -1");
+let popText = new PIXI.Text("Total Vote: " + 0 + "K");
+
 
 let cities = [];
 function initUI(){
+
+
+
     button.interactive = true;
     button.on('mousedown', () => {
 
@@ -79,6 +88,18 @@ function initUI(){
     selectionText.y = 50;
     app.stage.addChild(selectionText);
 
+    turnText.x = 800;
+    turnText.y = 350;
+    app.stage.addChild(turnText);
+
+    playerText.x = 800;
+    playerText.y = 400;
+    app.stage.addChild(playerText);
+
+    popText.x = 800;
+    popText.y = 450;
+    app.stage.addChild(popText);
+
     let texts = [eduText, healthText, transportText];
    
     texts.forEach((value, i) =>{
@@ -91,6 +112,10 @@ function initUI(){
             resetUI();
         })
     })
+}
+
+function updateVoteText(){
+    popText.text = "Total Vote: " + player.totalPop + "K";
 }
 
 function setButtonActive(isActive){
@@ -110,7 +135,7 @@ function setButtonActive(isActive){
     }
 }
 
-function initMapView(numberOfCities, cityPrimaries){
+function initMapView(numberOfCities, cityPrimaries, populations){
 
     let map = new PIXI.Sprite(PIXI.Texture.from('/map.png'));
     app.stage.addChild(map);
@@ -120,13 +145,13 @@ function initMapView(numberOfCities, cityPrimaries){
     let hexagons = [];
     for(let i = 0; i < numberOfCities ; i++){
         let hexagon = new PIXI.Graphics();
-        cities.push(new CityClient(i, cityPrimaries[i]));
+        cities.push(new CityClient(i, cityPrimaries[i], populations[i]));
         if(i < 8){
             hexagon.x = map.x + 240 + 220 * (Math.cos(Math.PI / 4 * i - Math.PI / 8));
             hexagon.y = map.y + 240 + 220 * (Math.sin(Math.PI / 4 * i - Math.PI / 8));
         } else if(i < 12){
-            hexagon.x = map.x + 240 + 130 * (Math.cos(Math.PI / 2 * i));
-            hexagon.y = map.y + 240 + 130 * (Math.sin(Math.PI / 2 * i));
+            hexagon.x = map.x + 230 + 130 * (Math.cos(Math.PI / 2 * i - Math.PI / 8));
+            hexagon.y = map.y + 230 + 130 * (Math.sin(Math.PI / 2 * i - Math.PI / 8));
         } else {
             hexagon.x = map.x + 240;
             hexagon.y = map.y + 240;
@@ -134,7 +159,7 @@ function initMapView(numberOfCities, cityPrimaries){
         }
         hexagon.interactive = true;
         
-        hexagon.basicText = new PIXI.Text(i, {'font': "20px"});
+        hexagon.basicText = new PIXI.Text(`Pop: ${cities[i].population}K`, {'font': "16px"});
         hexagon.basicText.x = 0;
         hexagon.basicText.y = 0;
 
@@ -212,8 +237,9 @@ socket.on('new turn', () => {
 
 socket.on('welcome', (data) => {
     player.id = data.size;
+    playerText.text = "You are Player # " + player.id;
     investment.id = data.size;
-    hexagons = initMapView(data.numberOfCities, data.cityPrimaries);
+    hexagons = initMapView(data.numberOfCities, data.cityPrimaries, data.populations);
     initUI();
 
 });
@@ -221,13 +247,14 @@ socket.on('welcome', (data) => {
 socket.on('results ready', (outcome) => {
     let capturedCity = -1;
     console.log(outcome);
+    turnText.text = "Turn # " + outcome.turnNo;
     let cityOwnerShips = outcome.cityOwnerShips;
     let lostCities = outcome.lostCities;
     hexagons.forEach((hexagon, i) => {
         if(cityOwnerShips[i].owner != -1)
-            hexagon.changeText("Owner: #" + cityOwnerShips[i].owner + "\n Score: " + cityOwnerShips[i].score);
+            hexagon.changeText(`Owner: # ${cityOwnerShips[i].owner}\nScore: ${cityOwnerShips[i].score}\nPop: ${cities[i].population}K`);
         else
-            hexagon.changeText("Emp");
+            hexagon.changeText(`Pop: ${cities[i].population}K`);
         if(capturedCity == -1 && cityOwnerShips[i].owner == player.id && !player.occupiedCities.has(i) ){
             capturedCity = i;
         }
@@ -241,6 +268,7 @@ socket.on('results ready', (outcome) => {
         player.occupiedCities.set(capturedCity, investedPromises);
         arrayAssign(player.promisesLeft, player.promisesInitial);
         console.log("I won the City # " + capturedCity + " in this turn");
+        player.totalPop += cities[capturedCity].population;
     } else if(capturedCity == -1){
         arrayAssign(player.promisesInitial, player.promisesLeft);
         console.log("I could not win any city in this turn");
@@ -258,9 +286,11 @@ socket.on('results ready', (outcome) => {
         lostCities[player.id].cities.forEach((city)=>{
             player.occupiedCities.delete(city);
             console.log("I lost City # " + city);
+            player.totalPop -= cities[city].population;
         });
     }
     console.log(player);
+    updateVoteText();
     resetUI();
 })
 
