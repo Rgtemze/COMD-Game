@@ -7,3 +7,9 @@ Strategy and political game in which you try to capture all of the cities and wi
 Cem Okan YALDIZ
 
 Ziya ERKOÇ
+
+# Libraries Used
+
+socket.io
+
+PixiJS
