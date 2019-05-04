@@ -31,6 +31,17 @@ io.on('connection', function(socket){
         gc.processInvestment(data);
         
     });
+
+    socket.on('inform population', data => {
+        
+        gc.players[data.id].totalPop = data.totalPop;
+        
+        gc.popInfoRemaining--;
+
+        if(gc.popInfoRemaining == 0){
+            gc.finish();
+        }
+    });
 });
 
 http.listen(3000, function(){
@@ -42,6 +53,7 @@ class GameController{
         this.isReady = true;
         this.totalPlayerCount = 2;
         this.playersAwaited = this.totalPlayerCount;
+        this.popInfoRemaining = this.totalPlayerCount;
         this.cities = [];
         this.players = [];
         this.numberOfCities = 13;
@@ -62,6 +74,29 @@ class GameController{
         this.playerNo = 0;
     }
     
+    finish(){
+
+
+        console.log(this.players);
+        let max = 0;
+        let id = -1;
+        let same = false;
+        this.players.forEach((player,i) => {
+            let pop = player.totalPop;
+            if(pop >= max){
+                same = (pop == max);
+                max = pop;
+                id = i;
+            }
+            console.log("Same: " + same + "Pop: " + pop + "Max: " + max);
+        });
+
+        if(!same)
+            io.sockets.emit("game over","Player # " + id + " won with " + max + " votes");
+        else
+            io.sockets.emit("game over", "Nobody won" + max);  
+    }
+
     addUser(player){
         this.playerNo++;
         this.players.push(player);
@@ -79,6 +114,7 @@ class GameController{
         this.players[investment.id].promises = investment.promise;
         this.players[investment.id].selectedCity = investment.selectedCity;
         this.players[investment.id].isOwn = investment.isOwn;
+        this.players[investment.id].totalPop = investment.totalPop;
 
         if(this.playersAwaited == 0){
             this.processTurn();
@@ -201,7 +237,6 @@ class GameController{
         let outcome = {cityOwnerShips: this.cityOwnerShips, lostCities: lostCities, turnNo: gc.turnNo}
 
         this.nextTurn(outcome);
-
     }
 
     addSumToFirstArray(from, to){
@@ -247,6 +282,7 @@ class PlayerData{
         this.promises = [0, 0, 0];
         this.selectedCity = -1;
         this.isOwn = false;
+        this.totalPop = 0;
     }
 
 }

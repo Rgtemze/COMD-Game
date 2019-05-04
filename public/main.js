@@ -27,6 +27,7 @@ class Investment{
         this.promise = [0,0,0];
         this.selectedCity = -1;
         this.isOwn = false;
+        this.totalPop = 0;
     }
 }
 
@@ -58,7 +59,7 @@ function initUI(){
 
     button.interactive = true;
     button.on('mousedown', () => {
-
+        investment.totalPop = player.totalPop;
         console.log(investment);
         console.log(player);
         if(investment.selectedCity == -1){
@@ -244,6 +245,14 @@ socket.on('welcome', (data) => {
 
 });
 
+socket.on("game over", (text) => {
+    eduText.text = "";
+    healthText.text = "";
+    transportText.text = "";
+
+    selectionText.text = text;
+});
+
 socket.on('results ready', (outcome) => {
     let capturedCity = -1;
     console.log(outcome);
@@ -292,6 +301,10 @@ socket.on('results ready', (outcome) => {
     console.log(player);
     updateVoteText();
     resetUI();
+
+    if(outcome.turnNo == 3){
+        socket.emit('inform population', {id: player.id, totalPop: player.totalPop});
+    }
 })
 
 function arrayAssign(from, to){
