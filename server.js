@@ -60,7 +60,7 @@ class GameController{
         this.cityOwnerShips = [];
         this.turnNo = 1;
         for(let i = 0; i < this.numberOfCities; i++){
-            let cityObj = new City("Adana" + i);
+            let cityObj = new City("Adana" + i, i);
             this.cities.push(cityObj);
             if(i < 8){
                 cityObj.population = Math.floor(Math.random() * 11 + 10);
@@ -218,7 +218,6 @@ class GameController{
 
         // Check if there are cities given up.
         this.players.forEach(player => {
-
             let city = player.selectedCity;
             if(!player.isOwn || this.cityOwnerShips[city].owner != player.id) return;
             lostCities[player.id].lost = true;
@@ -231,13 +230,64 @@ class GameController{
 
             cityObj.score = 0;
             cityObj.owner = -1;
-            arrayAssign(player.promises, this.cities[city].promises);
+            cityObj.resetPromises();
         });
+        
+        // Check if the player has lost any prerequisite city, if so, s/he may lost other cities.
+
+        lostCities.forEach((lostInfo, id) => {
+            if(lostInfo.lost){ // If user lost any city that is problem.
+                
+                // Loop through all the cities lost
+                lostInfo.cities.forEach(cityId =>{
+                    console.log("Checking " + cityId + "for further lost cities")
+                    
+                    let cityObj = this.cities[cityId];
+                    let rightCityObj = this.cities[cityObj.getRightNeighbour()];
+                    let leftCityObj = this.cities[cityObj.getLeftNeighbour()];
+                    let innerNeighbours = cityObj.getInnerNeighbours();
+                    if(innerNeighbours.length == 1){
+
+                        this.loseCity(innerNeighbours[0], id, leftCityObj, rightCityObj, lostCities);
+
+                    } else if(innerNeighbours.length == 2) {
+                        this.loseCity(innerNeighbours[0], id, null, rightCityObj, lostCities);
+                        this.loseCity(innerNeighbours[1], id, leftCityObj, null, lostCities);
+
+                    }
+                });
+
+            }
+        });
+        this.cityOwnerShips.forEach((cityOwnerShip) => {
+            console.log("Ownership: " + cityOwnerShip.owner + ", " + cityOwnerShip.score);
+        })
         gc.turnNo++;
         let outcome = {cityOwnerShips: this.cityOwnerShips, lostCities: lostCities, turnNo: gc.turnNo}
 
         this.nextTurn(outcome);
     }
+    // This method is for losing cities after losing a city
+    loseCity(gidiciId, playerId, leftCityObj, rightCityObj, lostCities){
+
+            let leftResult = (leftCityObj != null) ? leftCityObj.owner != playerId : true;
+            let rightResult = (rightCityObj != null) ? rightCityObj.owner != playerId : true;
+
+            if (this.cityOwnerShips[gidiciId].owner == playerId
+                && leftResult && rightResult){
+                let gidiciCityObj = this.cities[gidiciId];
+                lostCities[playerId].lost = true;
+                lostCities[playerId].cities.push(gidiciId);
+                this.addSumToFirstArray(lostCities[playerId].returnedPromises, gidiciCityObj.promises);
+                this.cityOwnerShips[gidiciId].owner = -1; 
+                this.cityOwnerShips[gidiciId].score = 0; 
+
+                gidiciCityObj.score = 0;
+                gidiciCityObj.owner = -1;
+                gidiciCityObj.resetPromises();
+            }
+    }
+
 
     addSumToFirstArray(from, to){
         if(from.length != to.length){
@@ -251,17 +301,65 @@ class GameController{
 
 }
 class City{
-    constructor(name){
+    constructor(name, id){
+        this.id = id;
         this.name = name;
         this.promises = [0, 0, 0];
         this.primaryPromise = Math.floor(Math.random() * 3);
         this.score = 0;
         this.population = 0;
         this.owner = -1;
+        this.dict = {};
     }
 
     getName(){
         return this.name;
+    }
+
+    resetPromises(){
+        this.promises[0] = 0;
+        this.promises[1] = 0;
+        this.promises[2] = 0;
+    }
+
+    getLeftNeighbour(){
+        
+        if(this.id < 8){
+            return (this.id + 1) % 8;
+        } else if(this.id < 11){
+            return (this.id == 11) ? 8: (this.id + 1);
+        }
+        return -1; // Number of outer cities
+    }
+
+    getRightNeighbour(){
+        if(this.id < 8){
+            return (this.id == 0) ? 7 : (this.id - 1);
+        } else if(this.id < 11){
+            return (this.id == 8) ? 11 : (this.id - 1);
+        }
+        return  -1; // Number of outer cities
+    }
+
+    getInnerNeighbours(){
+        let result = [];
+
+        if(this.id == 0 || this.id == 7 || this.id == 1){
+            result.push(8);
+        }
+        if(this.id == 1 || this.id == 2 || this.id == 3){
+            result.push(9);
+        }
+        if(this.id == 3 || this.id == 4 || this.id == 5){
+            result.push(10);
+        }
+        if(this.id == 5 || this.id == 6 || this.id == 7){
+            result.push(11);
+        }
+        if(this.id == 8 || this.id == 9 || this.id == 10 || this.id == 11){
+            result.push(12);
+        }
+        return result;
     }
 
     setPopulation(population){
