@@ -145,22 +145,24 @@ function initMapView(data){
 
     let map = new PIXI.Sprite(PIXI.Texture.from('/map.png'));
     app.stage.addChild(map);
-    map.x = 100;
-    map.y = 100;
+    map.x = 50;
+    map.y = 50;
+
+    map.width = map.height = 600;
 
     let hexagons = [];
     for(let i = 0; i < data.length ; i++){
         let hexagon = new PIXI.Graphics();
         cities.push(new CityClient(i, data[i].name, data[i].primaryPromise, data[i].population));
         if(i < 8){
-            hexagon.x = map.x + 225 + 220 * (Math.cos(Math.PI / 4 * i - Math.PI / 8));
-            hexagon.y = map.y + 225 + 220 * (Math.sin(Math.PI / 4 * i - Math.PI / 8));
+            hexagon.x = map.x + 280 + 250 * (Math.cos(Math.PI / 4 * i - Math.PI / 8));
+            hexagon.y = map.y + 280 + 250 * (Math.sin(Math.PI / 4 * i - Math.PI / 8));
         } else if(i < 12){
-            hexagon.x = map.x + 230 + 125 * (Math.cos(Math.PI / 2 * i - Math.PI / 8));
-            hexagon.y = map.y + 230 + 125 * (Math.sin(Math.PI / 2 * i - Math.PI / 8));
+            hexagon.x = map.x + 280 + 135 * (Math.cos(Math.PI / 2 * i - Math.PI / 8));
+            hexagon.y = map.y + 280 + 135 * (Math.sin(Math.PI / 2 * i - Math.PI / 8));
         } else {
-            hexagon.x = map.x + 240;
-            hexagon.y = map.y + 240;
+            hexagon.x = map.x + 280;
+            hexagon.y = map.y + 280;
             
         }
         hexagon.interactive = true;
@@ -182,7 +184,8 @@ function initMapView(data){
                 return;
             }
             investment.selectedCity = i;
-            hexagon.changeTextColor("green");
+
+            
             if(player.occupiedCities.has(i)){
                 investment.isOwn = true;
                 let promises = player.occupiedCities.get(i);
@@ -190,6 +193,7 @@ function initMapView(data){
                 button.text = "Give Up City";
             } else {
                 investment.isOwn = false;
+                hexagon.changeTextColor("blue");
                 selectionText.text = `You selected ${cities[i].name}`;
                 button.text = "Ready";
             }
@@ -302,12 +306,15 @@ socket.on('results ready', (outcome) => {
         player.promisesInitial[2] += returnedPromises[2];
         arrayAssign(player.promisesInitial, player.promisesLeft);
 
-        // Deoccupy the lost citie
+        // Deoccupy the lost cities
         lostCities[player.id].cities.forEach((city)=>{
-            player.occupiedCities.delete(city);
-            console.log("I lost City # " + city);
-            hexagons[city].changeTextColor("black");
-            player.totalPop -= cities[city].population;
+            player.occupiedCities.delete(city.cityId);
+            console.log("I lost City # " + city.cityId);
+            hexagons[city.cityId].changeTextColor("black");
+
+            //If it is newly invested do not decrement the population since it is never added
+            if(!city.newlyInvested)
+            player.totalPop -= cities[city.cityId].population;
         });
     }
     console.log(player);

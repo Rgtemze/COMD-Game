@@ -194,7 +194,7 @@ class GameController{
                     // If it had an owner previously
                     if(oldOwner != -1){
                         lostCities[oldOwner].lost = true;
-                        lostCities[oldOwner].cities.push(city);
+                        lostCities[oldOwner].cities.push({cityId: city, newlyInvested: false});
                         this.addSumToFirstArray( lostCities[oldOwner].returnedPromises, cityObj.promises);
                         console.log("Returned promises");
                         console.log(lostCities[oldOwner].returnedPromises);
@@ -222,7 +222,7 @@ class GameController{
             let city = player.selectedCity;
             if(!player.isOwn || this.cityOwnerShips[city].owner != player.id) return;
             lostCities[player.id].lost = true;
-            lostCities[player.id].cities.push(city);
+            lostCities[player.id].cities.push({cityId: city, newlyInvested: false});
             this.addSumToFirstArray(lostCities[player.id].returnedPromises, this.cities[city].promises);
             this.cityOwnerShips[city].owner = -1; 
             this.cityOwnerShips[city].score = 0; 
@@ -240,7 +240,8 @@ class GameController{
             if(lostInfo.lost){ // If user lost any city that is problem.
                 
                 // Loop through all the cities lost
-                lostInfo.cities.forEach(cityId =>{
+                lostInfo.cities.forEach(city =>{
+                    let cityId = city.cityId;
                     console.log("Checking " + cityId + "for further lost cities")
                     
                     let cityObj = this.cities[cityId];
@@ -278,14 +279,23 @@ class GameController{
                 && leftResult && rightResult){
                 let gidiciCityObj = this.cities[gidiciId];
                 lostCities[playerId].lost = true;
-                lostCities[playerId].cities.push(gidiciId);
-                this.addSumToFirstArray(lostCities[playerId].returnedPromises, gidiciCityObj.promises);
+                
+                // If it is the currently invested city do not return the promises.
+                if(this.players[playerId].selectedCity != gidiciId){
+                    lostCities[playerId].cities.push({cityId: gidiciId, newlyInvested: false});
+                    this.addSumToFirstArray(lostCities[playerId].returnedPromises, gidiciCityObj.promises);
+                } else {
+                    lostCities[playerId].cities.push({cityId: gidiciId, newlyInvested: true});
+                }
                 this.cityOwnerShips[gidiciId].owner = -1; 
                 this.cityOwnerShips[gidiciId].score = 0; 
 
                 gidiciCityObj.score = 0;
                 gidiciCityObj.owner = -1;
                 gidiciCityObj.resetPromises();
+
+                
+
             }
     }
 
