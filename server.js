@@ -22,7 +22,7 @@ io.on('connection', function(socket){
         });
 
         console.log("User Connected: " + gc.playerNo);
-        socket.emit("welcome", {size: gc.playerNo, numberOfCities: gc.numberOfCities, cityPrimaries: primaries, populations: populations});
+        socket.emit("welcome", {size: gc.playerNo, cities: gc.cities});
         gc.addUser(player);
     }));
 
@@ -59,8 +59,9 @@ class GameController{
         this.numberOfCities = 13;
         this.cityOwnerShips = [];
         this.turnNo = 1;
+        this.cityNames = ["Van", "Muş", "Antep", "Urfa", "Konya", "Uşak", "Bolu", "Rize", "Adana", "Mersin", "İzmir", "Bursa", "Ankara"]
         for(let i = 0; i < this.numberOfCities; i++){
-            let cityObj = new City("Adana" + i, i);
+            let cityObj = new City(this.cityNames[i], i);
             this.cities.push(cityObj);
             if(i < 8){
                 cityObj.population = Math.floor(Math.random() * 11 + 10);
