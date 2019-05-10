@@ -220,6 +220,9 @@ function initMapView(data){
 }
 
 function canGo(to){
+    if(player.occupiedCities.has(to)){
+        return true;
+    }
     if(to < 8){
         return true;
     }
@@ -263,6 +266,7 @@ socket.on('welcome', (data) => {
     investment.id = data.size;
     hexagons = initMapView(data.cities);
     initUI();
+    boldAcquirable();
 });
 
 socket.on("game over", (text) => {
@@ -347,6 +351,8 @@ socket.on('results ready', (outcome) => {
     if(outcome.turnNo == 10){
         socket.emit('inform population', {id: player.id, totalPop: player.totalPop});
     }
+    
+    boldAcquirable();
 })
 
 function arrayAssign(from, to){
@@ -368,4 +374,12 @@ function diffArray(x, y){
         result.push(x[i] - y[i]);
     })
     return result;
+}
+
+function boldAcquirable(){
+    hexagons.forEach((hexagon, i) => {
+        if(canGo(i)){
+            hexagon.basicText.style.fontStyle = "bold";
+        }
+    });
 }
