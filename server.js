@@ -253,9 +253,16 @@ class GameController{
                         this.loseCity(innerNeighbours[0], id, leftCityObj, rightCityObj, lostCities);
 
                     } else if(innerNeighbours.length == 2) {
-                        this.loseCity(innerNeighbours[0], id, null, rightCityObj, lostCities);
-                        this.loseCity(innerNeighbours[1], id, leftCityObj, null, lostCities);
 
+                        // cityId is a edge case because for this city the id of right city is bigger than the id of the left city
+                        // Since innerNeighbours returns smaller id first, it used to create problem.
+                        if(cityId == 7){
+                            this.loseCity(innerNeighbours[1], id, null, rightCityObj, lostCities);
+                            this.loseCity(innerNeighbours[0], id, leftCityObj, null, lostCities);
+                        } else {
+                            this.loseCity(innerNeighbours[0], id, null, rightCityObj, lostCities);
+                            this.loseCity(innerNeighbours[1], id, leftCityObj, null, lostCities);
+                        }
                     }
                 });
 
@@ -272,9 +279,14 @@ class GameController{
     // This method is for losing cities after losing a city
     loseCity(gidiciId, playerId, leftCityObj, rightCityObj, lostCities){
 
-            let leftResult = (leftCityObj != null) ? leftCityObj.owner != playerId : true;
-            let rightResult = (rightCityObj != null) ? rightCityObj.owner != playerId : true;
-
+            let leftResult = (leftCityObj != null) ? (leftCityObj.owner != playerId) : true;
+            let rightResult = (rightCityObj != null) ? (rightCityObj.owner != playerId) : true;
+            console.log("Left Result: " + leftResult);
+            console.log("Left Obj: " + leftCityObj);
+            console.log("Right Result: " + rightResult);
+            console.log("Right Obj: " + rightCityObj);
+            console.log("Gidici: " + gidiciId);
+            console.log("player: " + playerId);
             if (this.cityOwnerShips[gidiciId].owner == playerId
                 && leftResult && rightResult){
                 let gidiciCityObj = this.cities[gidiciId];
