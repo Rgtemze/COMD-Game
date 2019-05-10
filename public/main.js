@@ -52,7 +52,7 @@ let turnText = new PIXI.Text("Turn # 1");
 let playerText = new PIXI.Text("You are Player # -1");
 let popText = new PIXI.Text("Total Vote: " + 0 + "K");
 let gameStatText = new PIXI.Text("");
-
+let cityOwnerShips = [];
 
 let cities = [];
 function initUI(){
@@ -142,8 +142,8 @@ function setButtonActive(isActive){
 
 function resetColor(){
     hexagons.forEach((hexagon, i) =>{
-        if(!player.occupiedCities.has(i))
-        hexagon.basicText.style.fill = "black";
+        if(!player.occupiedCities.has(i) && cityOwnerShips[i].owner == -1)
+        hexagon.changeTextColor("black");
     });
 }
 
@@ -159,6 +159,7 @@ function initMapView(data){
     let hexagons = [];
     for(let i = 0; i < data.length ; i++){
         let hexagon = new PIXI.Graphics();
+        cityOwnerShips.push({owner: -1});
         cities.push(new CityClient(i, data[i].name, data[i].primaryPromise, data[i].population));
         if(i < 8){
             hexagon.x = map.x + 280 + 250 * (Math.cos(Math.PI / 4 * i - Math.PI / 8));
@@ -195,11 +196,13 @@ function initMapView(data){
             if(player.occupiedCities.has(i)){
                 investment.isOwn = true;
                 let promises = player.occupiedCities.get(i);
-                selectionText.text = `Your own city with promises [${promises[0]}, ${promises[1]}, ${promises[2]}]`;
+                selectionText.text = `You had invested  ${promises[0]} Education, ${promises[1]} Health, ${promises[2]} Transportation`;
                 button.text = "Give Up City";
             } else {
                 investment.isOwn = false;
-                hexagon.changeTextColor("blue");
+                if(cityOwnerShips[i].owner == -1){
+                    hexagon.changeTextColor("blue");
+                }
                 selectionText.text = `You selected ${cities[i].name}`;
                 button.text = "Ready";
             }
@@ -260,35 +263,38 @@ socket.on('welcome', (data) => {
     investment.id = data.size;
     hexagons = initMapView(data.cities);
     initUI();
-
 });
 
 socket.on("game over", (text) => {
     eduText.text = "";
     healthText.text = "";
     transportText.text = "";
-
     selectionText.text = text;
 });
 
 socket.on('results ready', (outcome) => {
-    gameStatText.text = "";
+    gameStatText.text = "Turn Results:\n";
     let capturedCity = -1;
     console.log(outcome);
     selectionText.text = "You did not select any city!";
     resetColor();
     turnText.text = "Turn # " + outcome.turnNo;
-    let cityOwnerShips = outcome.cityOwnerShips;
+    cityOwnerShips = outcome.cityOwnerShips;
     let lostCities = outcome.lostCities;
+
+    // Change the texts
     hexagons.forEach((hexagon, i) => {
-        if(cityOwnerShips[i].owner != -1)
+        if(cityOwnerShips[i].owner != -1){
             hexagon.changeText(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K Votes\nWon by ${cityOwnerShips[i].score} points`);
+        }
         else
             hexagon.changeText(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K Votes`);
         if(capturedCity == -1 && cityOwnerShips[i].owner == player.id && !player.occupiedCities.has(i) ){
             capturedCity = i;
         }
     });
+
+
     setButtonActive(true);
     console.log(capturedCity);
     console.log(player.occupiedCities.has(capturedCity));
@@ -297,7 +303,7 @@ socket.on('results ready', (outcome) => {
         let investedPromises = diffArray(player.promisesInitial, player.promisesLeft);
         player.occupiedCities.set(capturedCity, investedPromises);
         arrayAssign(player.promisesLeft, player.promisesInitial);
-        gameStatText.text  += "You won the " + cities[capturedCity].name + " in this turn\n";
+        gameStatText.text  += "You acquired " + cities[capturedCity].name + "\n";
         hexagons[capturedCity].changeTextColor("green");
         player.totalPop += cities[capturedCity].population;
     } else if(capturedCity == -1){
@@ -317,13 +323,23 @@ socket.on('results ready', (outcome) => {
         lostCities[player.id].cities.forEach((city)=>{
             player.occupiedCities.delete(city.cityId);
             gameStatText.text  += "You lost " + cities[city.cityId].name + "\n";
-            hexagons[city.cityId].changeTextColor("black");
 
             //If it is newly invested do not decrement the population since it is never added
             if(!city.newlyInvested)
-            player.totalPop -= cities[city.cityId].population;
+                player.totalPop -= cities[city.cityId].population;
         });
     }
+    // Change the colors
+    hexagons.forEach((hexagon, i) => {
+        if(cityOwnerShips[i].owner != -1){
+            if(!player.occupiedCities.has(i)){
+                hexagon.changeTextColor("red");
+            }
+        }
+        else
+            hexagon.changeTextColor("black");
+    });
+
     console.log(player);
     updateVoteText();
     resetUI();
