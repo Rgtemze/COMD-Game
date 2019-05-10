@@ -337,7 +337,7 @@ class City{
         
         if(this.id < 8){
             return (this.id + 1) % 8;
-        } else if(this.id < 11){
+        } else if(this.id < 12){
             return (this.id == 11) ? 8: (this.id + 1);
         }
         return -1; // Number of outer cities
@@ -346,7 +346,7 @@ class City{
     getRightNeighbour(){
         if(this.id < 8){
             return (this.id == 0) ? 7 : (this.id - 1);
-        } else if(this.id < 11){
+        } else if(this.id < 12){
             return (this.id == 8) ? 11 : (this.id - 1);
         }
         return  -1; // Number of outer cities

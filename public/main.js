@@ -51,6 +51,7 @@ let selectionText = new PIXI.Text("You did not select any city!");
 let turnText = new PIXI.Text("Turn # 1");
 let playerText = new PIXI.Text("You are Player # -1");
 let popText = new PIXI.Text("Total Vote: " + 0 + "K");
+let gameStatText = new PIXI.Text("");
 
 
 let cities = [];
@@ -98,6 +99,11 @@ function initUI(){
     popText.x = 800;
     popText.y = 450;
     app.stage.addChild(popText);
+    app.stage.addChild(playerText);
+
+    gameStatText.x = 800;
+    gameStatText.y = 500;
+    app.stage.addChild(gameStatText);
 
     let texts = [eduText, healthText, transportText];
    
@@ -266,6 +272,7 @@ socket.on("game over", (text) => {
 });
 
 socket.on('results ready', (outcome) => {
+    gameStatText.text = "";
     let capturedCity = -1;
     console.log(outcome);
     selectionText.text = "You did not select any city!";
@@ -290,12 +297,12 @@ socket.on('results ready', (outcome) => {
         let investedPromises = diffArray(player.promisesInitial, player.promisesLeft);
         player.occupiedCities.set(capturedCity, investedPromises);
         arrayAssign(player.promisesLeft, player.promisesInitial);
-        console.log("I won the City # " + capturedCity + " in this turn");
+        gameStatText.text  += "You won the " + cities[capturedCity].name + " in this turn\n";
         hexagons[capturedCity].changeTextColor("green");
         player.totalPop += cities[capturedCity].population;
     } else if(capturedCity == -1){
         arrayAssign(player.promisesInitial, player.promisesLeft);
-        console.log("I could not win any city in this turn");
+        gameStatText.text  += "You could not win any city in this turn\n";
     }
 
     // TODO: Bring cities as well
@@ -309,7 +316,7 @@ socket.on('results ready', (outcome) => {
         // Deoccupy the lost cities
         lostCities[player.id].cities.forEach((city)=>{
             player.occupiedCities.delete(city.cityId);
-            console.log("I lost City # " + city.cityId);
+            gameStatText.text  += "You lost " + cities[city.cityId].name + "\n";
             hexagons[city.cityId].changeTextColor("black");
 
             //If it is newly invested do not decrement the population since it is never added
