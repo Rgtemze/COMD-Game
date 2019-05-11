@@ -40,21 +40,25 @@ class CityClient{
     }
 }
 
-const promisesDict = ["Education", "Health", "Transportation"];
+const promisesDict = ["🎓", "🏥", "🚋"];
 let investment = new Investment();
 let button = new PIXI.Text("Ready");
 let player = new Player("Ziya", "Erkoc");
-let eduText = new PIXI.Text("Education Promises Left: " + player.promisesLeft[0]);
-let healthText = new PIXI.Text("Health Promises Left: " + player.promisesLeft[1]);
-let transportText = new PIXI.Text("Transportation Promises Left: " + player.promisesLeft[2]);
+let eduText = new PIXI.Text("🎓 Promises Left: " + player.promisesLeft[0]);
+let healthText = new PIXI.Text("🏥 Promises Left: " + player.promisesLeft[1]);
+let transportText = new PIXI.Text("🚋 Promises Left: " + player.promisesLeft[2]);
 let selectionText = new PIXI.Text("You did not select any city!");
 let turnText = new PIXI.Text("Turn # 1");
 let playerText = new PIXI.Text("You are Player # -1");
-let popText = new PIXI.Text("Total Vote: " + 0 + "K");
+let popText = new PIXI.Text("Total 🗳️: " + 0 + "K");
 let gameStatText = new PIXI.Text("");
 let rulesText = new PIXI.Text("?", {"fontSize": '40px', "fontWeight": 'bold'});
-let rules = "Click on the city that you want to acquire\nand invest promises on it by clicking the Promises on the right\n\n"
-            + "Cities that you can invest on are in bold\n\nYour cities are colored in green\n\nOpponent cities are colored in red"
+let rules = "Click on the city that you want to acquire\nand invest promises on it by clicking the Promises on the right"
+            + "\n\nEach ouf your promise are counted as 1 point,\nwhile each primary promise that you invested are counted as 2 points"
+            + "\n\nTotal point is used to determine who acquired the city"
+            + "\n\nCities that you can invest on are in bold"
+            + "\n\nYour cities are colored in green" 
+            + "\n\nOpponent cities are colored in red"
             + "\n\nIf you want to invest on a city, then you must have acquired a city in the outer circle"
             + "\n\nYou may even lose a city, if all the outer cities are also lost.";
 let cityOwnerShips = [];
@@ -154,7 +158,7 @@ function initUI(){
 }
 
 function updateVoteText(){
-    popText.text = "Total Vote: " + player.totalPop + "K";
+    popText.text = "Total 🗳️: " + player.totalPop + "K";
 }
 
 function setButtonActive(isActive){
@@ -208,7 +212,7 @@ function initMapView(data){
         }
         hexagon.interactive = true;
         
-        hexagon.basicText = new PIXI.Text(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K Votes`, {'font': "14px"});
+        hexagon.basicText = new PIXI.Text(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K 🗳️`, {'font': "16px"});
         hexagon.basicText.x = 0;
         hexagon.basicText.y = 0;
 
@@ -230,7 +234,7 @@ function initMapView(data){
             if(player.occupiedCities.has(i)){
                 investment.isOwn = true;
                 let promises = player.occupiedCities.get(i);
-                selectionText.text = `You had invested  ${promises[0]} Education, ${promises[1]} Health, ${promises[2]} Transportation`;
+                selectionText.text = `You had invested  ${promises[0]} 🎓, ${promises[1]} 🏥, ${promises[2]} 🚋`;
                 button.text = "Give Up City";
             } else {
                 investment.isOwn = false;
@@ -279,9 +283,9 @@ function canGo(to){
 }
 
 function resetUI(){
-    eduText.text = "Education Promises Left: " + player.promisesLeft[0];
-    healthText.text = "Health Promises Left: " + player.promisesLeft[1];
-    transportText.text = "Transportation Promises Left: " + player.promisesLeft[2];   
+    eduText.text = "🎓 Promises Left: " + player.promisesLeft[0];
+    healthText.text = "🏥 Promises Left: " + player.promisesLeft[1];
+    transportText.text = "🚋 Promises Left: " + player.promisesLeft[2];   
 }
 
 
@@ -323,10 +327,10 @@ socket.on('results ready', (outcome) => {
     // Change the texts
     hexagons.forEach((hexagon, i) => {
         if(cityOwnerShips[i].owner != -1){
-            hexagon.changeText(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K Votes\nWon by ${cityOwnerShips[i].score} points`);
+            hexagon.changeText(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K 🗳️\nWon by ${cityOwnerShips[i].score} points`);
         }
         else
-            hexagon.changeText(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K Votes`);
+            hexagon.changeText(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K 🗳️`);
         if(capturedCity == -1 && cityOwnerShips[i].owner == player.id && !player.occupiedCities.has(i) ){
             capturedCity = i;
         }
