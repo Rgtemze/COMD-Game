@@ -52,6 +52,11 @@ let turnText = new PIXI.Text("Turn # 1");
 let playerText = new PIXI.Text("You are Player # -1");
 let popText = new PIXI.Text("Total Vote: " + 0 + "K");
 let gameStatText = new PIXI.Text("");
+let rulesText = new PIXI.Text("?", {"fontSize": '40px', "fontWeight": 'bold'});
+let rules = "Click on the city that you want to acquire\nand invest promises on it by clicking the Promises on the right\n\n"
+            + "Cities that you can invest on are in bold\n\nYour cities are colored in green\n\nOpponent cities are colored in red"
+            + "\n\nIf you want to invest on a city, then you must have acquired a city in the outer circle"
+            + "\n\nYou may even lose a city, if all the outer cities are also lost.";
 let cityOwnerShips = [];
 
 let cities = [];
@@ -99,11 +104,40 @@ function initUI(){
     popText.x = 800;
     popText.y = 450;
     app.stage.addChild(popText);
-    app.stage.addChild(playerText);
 
     gameStatText.x = 800;
     gameStatText.y = 500;
     app.stage.addChild(gameStatText);
+
+    rulesText.x = 660;
+    rulesText.y = 50;
+    rulesText.interactive = true;
+    app.stage.addChild(rulesText);
+
+
+    let rect = new PIXI.Graphics();
+
+    rect.beginFill(0xFFFFFF);
+
+    // draw a rectangle
+    rect.drawRect(750, 50, 500, window.innerHeight);
+    app.stage.addChild(rect);
+    rect.height = 0; 
+    rulesText.on('mouseover', (event) => {
+        rulesText.text = rules;
+        rulesText.style.backgroundColor = "white";
+        rulesText.style.fontSize = "20px";
+        rect.height = window.innerHeight;
+    });
+    app.stage.addChild(rulesText);
+    rulesText.on('mouseout', (event) => {
+        rulesText.text = "?";
+        rulesText.style.fontSize = "40px";
+        rect.height = 0;
+    });
+
+
+
 
     let texts = [eduText, healthText, transportText];
    
@@ -380,6 +414,8 @@ function boldAcquirable(){
     hexagons.forEach((hexagon, i) => {
         if(canGo(i)){
             hexagon.basicText.style.fontStyle = "bold";
+        } else {
+            hexagon.basicText.style.fontStyle = "normal";    
         }
     });
 }

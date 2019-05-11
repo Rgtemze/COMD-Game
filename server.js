@@ -264,6 +264,8 @@ class GameController{
                             this.loseCity(innerNeighbours[1], id, leftCityObj, null, lostCities);
                         }
                     }
+                    //If the outermost city is lost, then capital might be lost as well.
+                    this.loseCapital(id, lostCities);
                 });
 
             }
@@ -276,6 +278,33 @@ class GameController{
 
         this.nextTurn(outcome);
     }
+
+    loseCapital(playerId, lostCities){
+        let gidiciCityObj = this.cities[12];
+        if(this.cityOwnerShips[12].owner == playerId 
+            && this.cityOwnerShips[11].owner != playerId
+            && this.cityOwnerShips[10].owner != playerId
+            && this.cityOwnerShips[9].owner != playerId
+            && this.cityOwnerShips[8].owner != playerId){
+                
+            this.cityOwnerShips[12].owner = -1; 
+            this.cityOwnerShips[12].score = 0; 
+            lostCities[playerId].lost = true;
+                
+            // If it is the currently invested city do not return the promises.
+            if(this.players[playerId].selectedCity != 12){
+                lostCities[playerId].cities.push({cityId: 12, newlyInvested: false});
+                this.addSumToFirstArray(lostCities[playerId].returnedPromises, gidiciCityObj.promises);
+            } else {
+                lostCities[playerId].cities.push({cityId: 12, newlyInvested: true});
+            }
+
+            gidiciCityObj.score = 0;
+            gidiciCityObj.owner = -1;
+            gidiciCityObj.resetPromises();
+        }
+    }
+
     // This method is for losing cities after losing a city
     loseCity(gidiciId, playerId, leftCityObj, rightCityObj, lostCities){
 
