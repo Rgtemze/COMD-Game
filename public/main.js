@@ -54,7 +54,7 @@ let popText = new PIXI.Text("Total 🗳️: " + 0 + "K");
 let gameStatText = new PIXI.Text("");
 let rulesText = new PIXI.Text("?", {"fontSize": '40px', "fontWeight": 'bold'});
 let rules = "Click on the city that you want to acquire\nand invest promises on it by clicking the Promises on the right"
-            + "\n\nEach ouf your promise are counted as 1 point,\nwhile each primary promise that you invested are counted as 2 points"
+            + "\n\nEach of your promises are counted as 1 point,\nwhile each primary promise that you invested are counted as 2 points"
             + "\n\nTotal point is used to determine who acquired the city"
             + "\n\nCities that you can invest on are in bold"
             + "\n\nYour cities are colored in green" 
@@ -234,7 +234,7 @@ function initMapView(data){
             if(player.occupiedCities.has(i)){
                 investment.isOwn = true;
                 let promises = player.occupiedCities.get(i);
-                selectionText.text = `You had invested  ${promises[0]} 🎓, ${promises[1]} 🏥, ${promises[2]} 🚋`;
+                selectionText.text = `You had invested ${promises[0]} 🎓, ${promises[1]} 🏥, ${promises[2]} 🚋 on ${cities[i].name}`;
                 button.text = "Give Up City";
             } else {
                 investment.isOwn = false;
@@ -386,7 +386,7 @@ socket.on('results ready', (outcome) => {
     updateVoteText();
     resetUI();
 
-    if(outcome.turnNo == 10){
+    if(outcome.turnNo == 4){
         socket.emit('inform population', {id: player.id, totalPop: player.totalPop});
     }
     

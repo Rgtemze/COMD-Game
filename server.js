@@ -63,13 +63,6 @@ class GameController{
         for(let i = 0; i < this.numberOfCities; i++){
             let cityObj = new City(this.cityNames[i], i);
             this.cities.push(cityObj);
-            if(i < 8){
-                cityObj.population = Math.floor(Math.random() * 11 + 10);
-            } else if(i < 12){
-                cityObj.population = Math.floor(Math.random() * 21 + 20);
-            } else {
-                cityObj.population = 50;
-            }
             this.cityOwnerShips.push({owner: -1, score: 0});
         }
         this.playerNo = 0;
@@ -352,14 +345,17 @@ class GameController{
     }
 
 }
+const populations = [30, 10, 20, 10, 40, 10, 20, 10, 50, 45, 40, 45, 60];
 class City{
+
+
     constructor(name, id){
         this.id = id;
         this.name = name;
         this.promises = [0, 0, 0];
         this.primaryPromise = Math.floor(Math.random() * 3);
         this.score = 0;
-        this.population = 0;
+        this.population = populations[id];
         this.owner = -1;
         this.dict = {};
     }
