@@ -40,6 +40,9 @@ class CityClient{
     }
 }
 
+let instructionIndex = 0;
+let instructions = ["Select one of the cities that are in bold.", "Click on the promises that you want to invest as much as you want",
+                        "Click Ready when you are ready!"]
 const promisesDict = ["🎓", "🏥", "🚋"];
 let investment = new Investment();
 let button = new PIXI.Text("Ready");
@@ -53,6 +56,7 @@ let playerText = new PIXI.Text("You are Player # -1");
 let popText = new PIXI.Text("Total 🗳️: " + 0 + "K");
 let gameStatText = new PIXI.Text("");
 let rulesText = new PIXI.Text("?", {"fontSize": '40px', "fontWeight": 'bold'});
+let instructionsText = new PIXI.Text("Instruction: " + instructions[instructionIndex], {"fontSize": "20px"});
 let rules = "Click on the city that you want to acquire\nand invest promises on it by clicking the Promises on the right"
             + "\n\nEach of your promises are counted as 1 point,\nwhile each primary promise that you invested are counted as 2 points"
             + "\n\nTotal point is used to determine who acquired the city"
@@ -73,6 +77,7 @@ function initUI(){
         if(investment.selectedCity == -1){
             return;
         }
+        instructionsText.text = "";
         socket.emit('investment', investment);
         investment.selectedCity = -1;
         selectionText.text = "Waiting for the opponents' turn!";
@@ -115,8 +120,12 @@ function initUI(){
 
     rulesText.x = 660;
     rulesText.y = 50;
-    rulesText.interactive = true;
     app.stage.addChild(rulesText);
+
+    instructionsText.x = 160;
+    instructionsText.y = 0;
+    blinkInstruction();
+    app.stage.addChild(instructionsText);
 
 
     let rect = new PIXI.Graphics();
@@ -150,11 +159,42 @@ function initUI(){
         value.interactive = true;
         value.on('mousedown', ()=>{
             if(investment.selectedCity == -1 || player.promisesLeft[index] == 0 || investment.isOwn) return;
+
+            if(instructionIndex == 1){
+                instructionIndex++;
+                updateInstruction();
+                blinkReady();
+            }
+
             player.promisesLeft[index]--;
             investment.promise[index]++;
             resetUI();
         })
     })
+}
+
+function blinkReady(){
+
+}
+
+function blinkInstruction(){
+    let i = 0;
+    instructionsText.style.fill = "white";
+    let interval = setInterval(()=>{
+        if(i++ == 2){
+            clearInterval(interval);
+        }
+        instructionsText.style.fill = (instructionsText.style.fill == "black") ? "white" : "black";
+    }, 500)
+}
+
+function blinkPromises(){
+
+}
+
+function updateInstruction(){
+    instructionsText.text = "Instruction: " + instructions[instructionIndex];
+    blinkInstruction();
 }
 
 function updateVoteText(){
@@ -223,6 +263,7 @@ function initMapView(data){
         hexagon.on('mousedown', () => {
             resetColor();
 
+
             if(!canGo(i)){
                 investment.selectedCity = -1;
                 selectionText.text = "You cannot select that city!";
@@ -230,6 +271,11 @@ function initMapView(data){
             }
             investment.selectedCity = i;
 
+            if(instructionIndex == 0){
+                instructionIndex++;
+                updateInstruction();
+                blinkPromises();
+            }
             
             if(player.occupiedCities.has(i)){
                 investment.isOwn = true;
