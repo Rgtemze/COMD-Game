@@ -432,7 +432,7 @@ socket.on('results ready', (outcome) => {
     updateVoteText();
     resetUI();
 
-    if(outcome.turnNo == 4){
+    if(outcome.turnNo == 10){
         socket.emit('inform population', {id: player.id, totalPop: player.totalPop});
     }
     

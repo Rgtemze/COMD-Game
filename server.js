@@ -239,22 +239,24 @@ class GameController{
                     
                     let cityObj = this.cities[cityId];
                     let rightCityObj = this.cities[cityObj.getRightNeighbour()];
+                    let rightRightCityObj = this.cities[this.cities[cityObj.getRightNeighbour()].getRightNeighbour()];
                     let leftCityObj = this.cities[cityObj.getLeftNeighbour()];
+                    let leftLeftCityObj = this.cities[this.cities[cityObj.getLeftNeighbour()].getLeftNeighbour()];
                     let innerNeighbours = cityObj.getInnerNeighbours();
                     if(innerNeighbours.length == 1){
 
-                        this.loseCity(innerNeighbours[0], id, leftCityObj, rightCityObj, lostCities);
+                        this.loseCity(innerNeighbours[0], id, leftCityObj, rightCityObj, null, lostCities);
 
                     } else if(innerNeighbours.length == 2) {
 
                         // cityId is a edge case because for this city the id of right city is bigger than the id of the left city
                         // Since innerNeighbours returns smaller id first, it used to create problem.
                         if(cityId == 7){
-                            this.loseCity(innerNeighbours[1], id, null, rightCityObj, lostCities);
-                            this.loseCity(innerNeighbours[0], id, leftCityObj, null, lostCities);
+                            this.loseCity(innerNeighbours[1], id, null, rightCityObj, rightRightCityObj,  lostCities);
+                            this.loseCity(innerNeighbours[0], id, leftCityObj, null, leftLeftCityObj, lostCities);
                         } else {
-                            this.loseCity(innerNeighbours[0], id, null, rightCityObj, lostCities);
-                            this.loseCity(innerNeighbours[1], id, leftCityObj, null, lostCities);
+                            this.loseCity(innerNeighbours[0], id, null, rightCityObj, rightRightCityObj, lostCities);
+                            this.loseCity(innerNeighbours[1], id, leftCityObj, null, leftLeftCityObj, lostCities);
                         }
                     }
                     //If the outermost city is lost, then capital might be lost as well.
@@ -272,6 +274,41 @@ class GameController{
         this.nextTurn(outcome);
     }
 
+    // This method is for losing cities after losing a city
+    loseCity(gidiciId, playerId, leftCityObj, rightCityObj, furtherObj, lostCities){
+
+        let leftResult = (leftCityObj != null) ? (leftCityObj.owner != playerId) : true;
+        let rightResult = (rightCityObj != null) ? (rightCityObj.owner != playerId) : true;
+        let furtherResult = (furtherObj != null) ? (furtherObj.owner != playerId) : true;
+        console.log("Left Result: " + leftResult);
+        console.log("Left Obj: " + leftCityObj);
+        console.log("Right Result: " + rightResult);
+        console.log("Right Obj: " + rightCityObj);
+        console.log("Gidici: " + gidiciId);
+        console.log("player: " + playerId);
+        if (this.cityOwnerShips[gidiciId].owner == playerId
+            && leftResult && rightResult && furtherResult){
+            let gidiciCityObj = this.cities[gidiciId];
+            lostCities[playerId].lost = true;
+            
+            // If it is the currently invested city do not return the promises.
+            if(this.players[playerId].selectedCity != gidiciId){
+                lostCities[playerId].cities.push({cityId: gidiciId, newlyInvested: false});
+                this.addSumToFirstArray(lostCities[playerId].returnedPromises, gidiciCityObj.promises);
+            } else {
+                lostCities[playerId].cities.push({cityId: gidiciId, newlyInvested: true});
+            }
+            this.cityOwnerShips[gidiciId].owner = -1; 
+            this.cityOwnerShips[gidiciId].score = 0; 
+
+            gidiciCityObj.score = 0;
+            gidiciCityObj.owner = -1;
+            gidiciCityObj.resetPromises();
+
+            
+
+        }
+    }
     loseCapital(playerId, lostCities){
         let gidiciCityObj = this.cities[12];
         if(this.cityOwnerShips[12].owner == playerId 
@@ -298,40 +335,7 @@ class GameController{
         }
     }
 
-    // This method is for losing cities after losing a city
-    loseCity(gidiciId, playerId, leftCityObj, rightCityObj, lostCities){
-
-            let leftResult = (leftCityObj != null) ? (leftCityObj.owner != playerId) : true;
-            let rightResult = (rightCityObj != null) ? (rightCityObj.owner != playerId) : true;
-            console.log("Left Result: " + leftResult);
-            console.log("Left Obj: " + leftCityObj);
-            console.log("Right Result: " + rightResult);
-            console.log("Right Obj: " + rightCityObj);
-            console.log("Gidici: " + gidiciId);
-            console.log("player: " + playerId);
-            if (this.cityOwnerShips[gidiciId].owner == playerId
-                && leftResult && rightResult){
-                let gidiciCityObj = this.cities[gidiciId];
-                lostCities[playerId].lost = true;
-                
-                // If it is the currently invested city do not return the promises.
-                if(this.players[playerId].selectedCity != gidiciId){
-                    lostCities[playerId].cities.push({cityId: gidiciId, newlyInvested: false});
-                    this.addSumToFirstArray(lostCities[playerId].returnedPromises, gidiciCityObj.promises);
-                } else {
-                    lostCities[playerId].cities.push({cityId: gidiciId, newlyInvested: true});
-                }
-                this.cityOwnerShips[gidiciId].owner = -1; 
-                this.cityOwnerShips[gidiciId].score = 0; 
-
-                gidiciCityObj.score = 0;
-                gidiciCityObj.owner = -1;
-                gidiciCityObj.resetPromises();
-
-                
-
-            }
-    }
+   
 
 
     addSumToFirstArray(from, to){
