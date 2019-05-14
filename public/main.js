@@ -192,7 +192,16 @@ function blinkInstruction(){
 }
 
 function blinkPromises(){
-
+    console.log("Blinking promise");
+    let i = 0;
+    let interval = setInterval(()=>{
+        if(i++ == 1){
+            clearInterval(interval);
+        }
+        eduText.style.fill = (eduText.style.fill == "black") ? "red" : "black";
+        healthText.style.fill = (healthText.style.fill == "black") ? "red" : "black";
+        transportText.style.fill = (transportText.style.fill == "black") ? "red" : "black";
+    }, 500)
 }
 
 function updateInstruction(){
@@ -260,6 +269,11 @@ function initMapView(data){
             resetColor();
 
 
+
+            // Since city is changed, reset the investments
+            arrayAssign(player.promisesInitial, player.promisesLeft);
+            investment.promise = [0, 0, 0];
+            resetUI();
             if(!canGo(i)){
                 investment.selectedCity = -1;
                 selectionText.text = "You cannot invest on that city!\nTo invest you should acquire at least one of the following cities:\n";
@@ -295,11 +309,6 @@ function initMapView(data){
                 selectionText.text = `You are investing ${investment.promise[0]} 🎓, ${investment.promise[1]} 🏥, ${investment.promise[2]} 🚋 on ${cities[i].name}`;
                 button.text = "Ready";
             }
-
-            // Since city is changed, reset the investments
-            arrayAssign(player.promisesInitial, player.promisesLeft);
-            investment.promise = [0, 0, 0];
-            resetUI();
         });
         app.stage.addChild(hexagon);
         hexagons.push(hexagon);
