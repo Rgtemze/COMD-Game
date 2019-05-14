@@ -57,14 +57,14 @@ let popText = new PIXI.Text("Total 🗳️: " + 0 + "K");
 let gameStatText = new PIXI.Text("");
 let rulesText = new PIXI.Text("?", {"fontSize": '40px', "fontWeight": 'bold'});
 let instructionsText = new PIXI.Text("Instruction: " + instructions[instructionIndex], {"fontSize": "20px"});
-let rules = "Click on the city that you want to acquire\nand invest promises on it by clicking the Promises on the right"
-            + "\n\nEach of your promises are counted as 1 point,\nwhile each primary promise that you invested are counted as 2 points"
+let rules = "Each of your promises are counted as 1 point,\nwhile each primary promise that you invested are counted as 2 points"
             + "\n\nTotal point is used to determine who acquired the city"
             + "\n\nCities that you can invest on are in bold"
             + "\n\nYour cities are colored in green" 
             + "\n\nOpponent cities are colored in red"
             + "\n\nIf you want to invest on a city, then you must have acquired a city in the outer circle"
-            + "\n\nYou may even lose a city, if all the outer cities are also lost.";
+            + "\n\nYou may even lose a city, if your neighbour outer cities are also lost."
+            + "\n\nIf you had invested on a city which is given up by another player, \nyou can acquire that city only if your score is higher.";
 let cityOwnerShips = [];
 
 let cities = [];
