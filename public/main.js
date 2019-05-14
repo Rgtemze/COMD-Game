@@ -41,7 +41,7 @@ class CityClient{
 }
 
 let instructionIndex = 0;
-let instructions = ["Select one of the cities that are in bold.", "Click on the promises that you want to invest as much as you want",
+let instructions = ["Select only one of the cities that are in bold.", "Click on the promises that you want to invest as much as you want",
                         "Click Ready when you are ready!"]
 const promisesDict = ["🎓", "🏥", "🚋"];
 let investment = new Investment();
@@ -50,7 +50,7 @@ let player = new Player("Ziya", "Erkoc");
 let eduText = new PIXI.Text("🎓 Promises Left: " + player.promisesLeft[0]);
 let healthText = new PIXI.Text("🏥 Promises Left: " + player.promisesLeft[1]);
 let transportText = new PIXI.Text("🚋 Promises Left: " + player.promisesLeft[2]);
-let selectionText = new PIXI.Text("You did not select any city!");
+let selectionText = new PIXI.Text("You did not select any city!", {"fontSize" : "22px"});
 let turnText = new PIXI.Text("Turn # 1");
 let playerText = new PIXI.Text("You are Player # -1");
 let popText = new PIXI.Text("Total 🗳️: " + 0 + "K");
@@ -68,6 +68,7 @@ let rules = "Click on the city that you want to acquire\nand invest promises on 
 let cityOwnerShips = [];
 
 let cities = [];
+let investmentTexts = [];
 function initUI(){
     button.interactive = true;
     button.on('mousedown', () => {
@@ -120,6 +121,7 @@ function initUI(){
 
     rulesText.x = 660;
     rulesText.y = 50;
+    rulesText.interactive = true;
     app.stage.addChild(rulesText);
 
     instructionsText.x = 160;
@@ -152,9 +154,9 @@ function initUI(){
 
 
 
-    let texts = [eduText, healthText, transportText];
+    investmentTexts = [eduText, healthText, transportText];
    
-    texts.forEach((value, i) =>{
+    investmentTexts.forEach((value, i) =>{
         let index = i;
         value.interactive = true;
         value.on('mousedown', ()=>{
@@ -168,6 +170,7 @@ function initUI(){
 
             player.promisesLeft[index]--;
             investment.promise[index]++;
+            selectionText.text = `You are investing ${investment.promise[0]} 🎓, ${investment.promise[1]} 🏥, ${investment.promise[2]} 🚋 on ${cities[investment.selectedCity].name}`;
             resetUI();
         })
     })
@@ -178,10 +181,10 @@ function blinkReady(){
 }
 
 function blinkInstruction(){
-    let i = 0;
-    instructionsText.style.fill = "white";
+    return;
+    //instructionsText.style.fill = "white";
     let interval = setInterval(()=>{
-        if(i++ == 2){
+        if(i++ == 1){
             clearInterval(interval);
         }
         instructionsText.style.fill = (instructionsText.style.fill == "black") ? "white" : "black";
@@ -206,16 +209,9 @@ function setButtonActive(isActive){
     hexagons.forEach((hexagon) => {
         hexagon.interactive = isActive;
     });
+    button.interactive = isActive;
 
-    if(isActive){
-        button.interactive = true;
-        button.style.fill = "black";
-        
-    } else {
-
-        button.interactive = false;
-        button.style.fill = "gray";
-    }
+    button.style.fill = (isActive) ? "black" : "gray";
 }
 
 function resetColor(){
@@ -266,9 +262,17 @@ function initMapView(data){
 
             if(!canGo(i)){
                 investment.selectedCity = -1;
-                selectionText.text = "You cannot select that city!";
+                selectionText.text = "You cannot invest on that city!\nTo invest you should acquire at least one of the following cities:\n";
+                let preRequisities = getPrerequisities(i);
+                let necessaryCities = "";
+                preRequisities.forEach((cityId) => {
+                    necessaryCities += cities[cityId].name + " ";
+                });
+                selectionText.text += necessaryCities;
+                setActiveColorInvestmentTexts(false);
                 return;
             }
+            setActiveColorInvestmentTexts(true);
             investment.selectedCity = i;
 
             if(instructionIndex == 0){
@@ -281,13 +285,14 @@ function initMapView(data){
                 investment.isOwn = true;
                 let promises = player.occupiedCities.get(i);
                 selectionText.text = `You had invested ${promises[0]} 🎓, ${promises[1]} 🏥, ${promises[2]} 🚋 on ${cities[i].name}`;
+                setActiveColorInvestmentTexts(false);
                 button.text = "Give Up City";
             } else {
                 investment.isOwn = false;
                 if(cityOwnerShips[i].owner == -1){
                     hexagon.changeTextColor("blue");
                 }
-                selectionText.text = `You selected ${cities[i].name}`;
+                selectionText.text = `You are investing ${investment.promise[0]} 🎓, ${investment.promise[1]} 🏥, ${investment.promise[2]} 🚋 on ${cities[i].name}`;
                 button.text = "Ready";
             }
 
@@ -325,7 +330,33 @@ function canGo(to){
     }
 
     return false;
+}
 
+function getPrerequisities(to){
+    let result = [];
+    if(to == 8){
+        result.push(0);
+        result.push(7);
+        result.push(1);
+    } else if(to == 9){
+        result.push(1);
+        result.push(2);
+        result.push(3);
+    } else if(to == 10){
+        result.push(3);
+        result.push(4);
+        result.push(5);
+    } else if(to == 11){
+        result.push(5);
+        result.push(6);
+        result.push(7);
+    } else if(to == 12){
+        result.push(8);
+        result.push(9);
+        result.push(10);
+        result.push(11);
+    }
+    return result;
 }
 
 function resetUI(){
@@ -459,6 +490,13 @@ function diffArray(x, y){
     })
     return result;
 }
+
+function setActiveColorInvestmentTexts(isActive){
+    investmentTexts.forEach((text) => {
+        text.style.fill = (isActive) ? "black" : "gray";
+    });
+}
+
 
 function boldAcquirable(){
     hexagons.forEach((hexagon, i) => {
