@@ -59,7 +59,7 @@ class GameController{
         this.numberOfCities = 13;
         this.cityOwnerShips = [];
         this.turnNo = 1;
-        this.cityNames = ["Van", "Muş", "Antep", "Urfa", "Konya", "Uşak", "Bolu", "Rize", "Adana", "Mersin", "İzmir", "Bursa", "Ankara"]
+        this.cityNames = ["Van", "Muş", "Antep", "Urfa", "Konya", "Uşak", "Bolu", "Rize", "Ankara", "Mersin", "İzmir", "Bursa", "Adana"]
         for(let i = 0; i < this.numberOfCities; i++){
             let cityObj = new City(this.cityNames[i], i);
             this.cities.push(cityObj);
@@ -69,8 +69,6 @@ class GameController{
     }
     
     finish(){
-
-
         console.log(this.players);
         let max = 0;
         let id = -1;

@@ -51,6 +51,9 @@ let eduText = new PIXI.Text("🎓 Promises Left: " + player.promisesLeft[0]);
 let healthText = new PIXI.Text("🏥 Promises Left: " + player.promisesLeft[1]);
 let transportText = new PIXI.Text("🚋 Promises Left: " + player.promisesLeft[2]);
 let selectionText = new PIXI.Text("You did not select any city!", {"fontSize" : "22px"});
+var envelope = new PIXI.Text('\uf003', {        fill: '#ffffff﻿',        font: '12px fontawesome'    ﻿﻿}); ﻿   app.stage.addChild(envelope);
+app.stage.addChild(envelope);
+
 let turnText = new PIXI.Text("Turn # 1");
 let playerText = new PIXI.Text("You are Player # -1");
 let popText = new PIXI.Text("Total 🗳️: " + 0 + "K");
@@ -226,13 +229,14 @@ function setButtonActive(isActive){
 function resetColor(){
     hexagons.forEach((hexagon, i) =>{
         if(!player.occupiedCities.has(i) && cityOwnerShips[i].owner == -1)
-        hexagon.changeTextColor("black");
+        hexagon.changeTextColor("white");
+        hexagon.changeColor(0xffffff);
     });
 }
 
 function initMapView(data){
 
-    let map = new PIXI.Sprite(PIXI.Texture.from('/map.png'));
+    let map = new PIXI.Sprite(PIXI.Texture.from('/maps.png'));
     app.stage.addChild(map);
     map.x = 50;
     map.y = 50;
@@ -241,34 +245,42 @@ function initMapView(data){
 
     let hexagons = [];
     for(let i = 0; i < data.length ; i++){
-        let hexagon = new PIXI.Graphics();
+        let hexagon = new PIXI.Sprite(PIXI.Texture.from('/outer.png'));
         cityOwnerShips.push({owner: -1});
         cities.push(new CityClient(i, data[i].name, data[i].primaryPromise, data[i].population));
+        hexagon.anchor.set(0.5);
+        
+        hexagon.basicText = new PIXI.Text(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K 🗳️`, {'font': "16px"});
+        hexagon.basicText.x = 0;
+        hexagon.basicText.anchor.set(0.5);
+        hexagon.basicText.y = 0;
         if(i < 8){
             hexagon.x = map.x + 280 + 250 * (Math.cos(Math.PI / 4 * i - Math.PI / 8));
             hexagon.y = map.y + 280 + 250 * (Math.sin(Math.PI / 4 * i - Math.PI / 8));
+            hexagon.rotation = Math.PI / 4 * i + Math.PI * 0.735;
+            //hexagon.basicText.rotation = Math.PI / 3.7 * i;
         } else if(i < 12){
             hexagon.x = map.x + 280 + 135 * (Math.cos(Math.PI / 2 * i - Math.PI / 8));
             hexagon.y = map.y + 280 + 135 * (Math.sin(Math.PI / 2 * i - Math.PI / 8));
+            hexagon.rotation = Math.PI / 2 * i + Math.PI * 0.735;
         } else {
             hexagon.x = map.x + 280;
             hexagon.y = map.y + 280;
             
         }
         hexagon.interactive = true;
-        
-        hexagon.basicText = new PIXI.Text(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K 🗳️`, {'font': "16px"});
+        hexagon.tint = 0x00ff00;
+        hexagon.basicText.rotation = -(hexagon.rotation);//Math.PI / 0.6;
         hexagon.basicText.x = 0;
         hexagon.basicText.y = 0;
 
         hexagon.changeText = (text) => (hexagon.basicText.text = text);
         hexagon.changeTextColor = (color) => (hexagon.basicText.style.fill = color);
+        hexagon.changeColor = (color) => (hexagon.tint = color);
 
         hexagon.addChild(hexagon.basicText);
         hexagon.on('mousedown', () => {
             resetColor();
-
-
 
             // Since city is changed, reset the investments
             arrayAssign(player.promisesInitial, player.promisesLeft);
