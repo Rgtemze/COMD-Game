@@ -90,36 +90,37 @@ function initUI(){
         setButtonActive(false);
     });
 
-    eduText.x = 800;
-    eduText.y = 150;
+    eduText.x = window.innerWidth * 0.13;
+    eduText.y = window.innerHeight * 0.4;
     app.stage.addChild(eduText);
 
-    healthText.x = 800;
-    healthText.y = 200;
+    healthText.x = window.innerWidth * 0.13;
+    healthText.y = eduText.y + 50;
     app.stage.addChild(healthText);
 
-    transportText.x = 800;
-    transportText.y = 250;
+    transportText.x = window.innerWidth * 0.13;
+    transportText.y = eduText.y + 100;
     app.stage.addChild(transportText);
 
-    selectionText.x = 800;
-    selectionText.y = 50;
+    selectionText.x = window.innerWidth / 2;
+    selectionText.y = 630;
+    selectionText.anchor.set(0.5);
     app.stage.addChild(selectionText);
 
-    turnText.x = 800;
-    turnText.y = 350;
+    turnText.x = window.innerWidth * 0.7;
+    turnText.y = window.innerHeight * 0.4;
     app.stage.addChild(turnText);
 
-    playerText.x = 800;
-    playerText.y = 400;
+    playerText.x = window.innerWidth * 0.7;
+    playerText.y = turnText.y + 50;
     app.stage.addChild(playerText);
 
-    popText.x = 800;
-    popText.y = 450;
+    popText.x = window.innerWidth * 0.7;
+    popText.y = turnText.y + 100;
     app.stage.addChild(popText);
 
-    gameStatText.x = 800;
-    gameStatText.y = 500;
+    gameStatText.x = window.innerWidth * 0.7;
+    gameStatText.y = turnText.y + 150;
     app.stage.addChild(gameStatText);
 
     rulesText.x = 660;
@@ -127,8 +128,9 @@ function initUI(){
     rulesText.interactive = true;
     app.stage.addChild(rulesText);
 
-    instructionsText.x = 160;
-    instructionsText.y = 0;
+    instructionsText.x = window.innerWidth / 2;
+    instructionsText.y = window.innerHeight * 0.05;
+    instructionsText.anchor.set(0.5);
     blinkInstruction();
     app.stage.addChild(instructionsText);
 
@@ -228,9 +230,10 @@ function setButtonActive(isActive){
 
 function resetColor(){
     hexagons.forEach((hexagon, i) =>{
-        if(!player.occupiedCities.has(i) && cityOwnerShips[i].owner == -1)
-        hexagon.changeTextColor("white");
-        hexagon.changeColor(0xffffff);
+        if(!player.occupiedCities.has(i) && cityOwnerShips[i].owner == -1){
+            hexagon.changeTextColor("white");
+            hexagon.changeColor(0xc5c8cc);
+        }
     });
 }
 
@@ -238,14 +241,22 @@ function initMapView(data){
 
     let map = new PIXI.Sprite(PIXI.Texture.from('/maps.png'));
     app.stage.addChild(map);
-    map.x = 50;
-    map.y = 50;
 
     map.width = map.height = 600;
+    map.x = window.innerWidth / 2 - map.width / 2;
+    map.y = window.innerHeight / 2 - map.height / 2;
+    map.anchor.set(0.5);
 
     let hexagons = [];
     for(let i = 0; i < data.length ; i++){
-        let hexagon = new PIXI.Sprite(PIXI.Texture.from('/outer.png'));
+        let hexagon; 
+        if(i < 8){
+            hexagon = new PIXI.Sprite(PIXI.Texture.from('/outer.png'));
+        } else if(i < 12){
+            hexagon = new PIXI.Sprite(PIXI.Texture.from('/inner.png'));
+        } else {
+            hexagon = new PIXI.Sprite(PIXI.Texture.from('/center.png'));
+        }
         cityOwnerShips.push({owner: -1});
         cities.push(new CityClient(i, data[i].name, data[i].primaryPromise, data[i].population));
         hexagon.anchor.set(0.5);
@@ -254,22 +265,23 @@ function initMapView(data){
         hexagon.basicText.x = 0;
         hexagon.basicText.anchor.set(0.5);
         hexagon.basicText.y = 0;
+        hexagon.basicText.style.fill = "white";
         if(i < 8){
-            hexagon.x = map.x + 280 + 250 * (Math.cos(Math.PI / 4 * i - Math.PI / 8));
-            hexagon.y = map.y + 280 + 250 * (Math.sin(Math.PI / 4 * i - Math.PI / 8));
+            hexagon.x = map.x + 280 + 215 * (Math.cos(Math.PI / 4 * i - Math.PI / 8));
+            hexagon.y = map.y + 280 + 215 * (Math.sin(Math.PI / 4 * i - Math.PI / 8));
             hexagon.rotation = Math.PI / 4 * i + Math.PI * 0.735;
             //hexagon.basicText.rotation = Math.PI / 3.7 * i;
         } else if(i < 12){
-            hexagon.x = map.x + 280 + 135 * (Math.cos(Math.PI / 2 * i - Math.PI / 8));
-            hexagon.y = map.y + 280 + 135 * (Math.sin(Math.PI / 2 * i - Math.PI / 8));
-            hexagon.rotation = Math.PI / 2 * i + Math.PI * 0.735;
+            hexagon.x = map.x + 280 + 120 * (Math.cos(Math.PI / 2 * i - Math.PI / 8));
+            hexagon.y = map.y + 280 + 120 * (Math.sin(Math.PI / 2 * i - Math.PI / 8));
+            hexagon.rotation = Math.PI / 2 * i + Math.PI * 0.87;
         } else {
             hexagon.x = map.x + 280;
             hexagon.y = map.y + 280;
             
         }
         hexagon.interactive = true;
-        hexagon.tint = 0x00ff00;
+        hexagon.tint = 0xc5c8cc;
         hexagon.basicText.rotation = -(hexagon.rotation);//Math.PI / 0.6;
         hexagon.basicText.x = 0;
         hexagon.basicText.y = 0;
@@ -316,7 +328,7 @@ function initMapView(data){
             } else {
                 investment.isOwn = false;
                 if(cityOwnerShips[i].owner == -1){
-                    hexagon.changeTextColor("blue");
+                    hexagon.changeColor(0x0000ff);
                 }
                 selectionText.text = `You are investing ${investment.promise[0]} 🎓, ${investment.promise[1]} 🏥, ${investment.promise[2]} 🚋 on ${cities[i].name}`;
                 button.text = "Ready";
@@ -425,7 +437,7 @@ socket.on('results ready', (outcome) => {
     // Change the texts
     hexagons.forEach((hexagon, i) => {
         if(cityOwnerShips[i].owner != -1){
-            hexagon.changeText(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K 🗳️\nWon by ${cityOwnerShips[i].score} points`);
+            hexagon.changeText(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K 🗳️\n${cityOwnerShips[i].score} pts`);
         }
         else
             hexagon.changeText(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K 🗳️`);
@@ -444,7 +456,7 @@ socket.on('results ready', (outcome) => {
         player.occupiedCities.set(capturedCity, investedPromises);
         arrayAssign(player.promisesLeft, player.promisesInitial);
         gameStatText.text  += "You acquired " + cities[capturedCity].name + "\n";
-        hexagons[capturedCity].changeTextColor("green");
+        hexagons[capturedCity].changeColor(0x00ff00);
         player.totalPop += cities[capturedCity].population;
     } else if(capturedCity == -1){
         arrayAssign(player.promisesInitial, player.promisesLeft);
@@ -473,11 +485,11 @@ socket.on('results ready', (outcome) => {
     hexagons.forEach((hexagon, i) => {
         if(cityOwnerShips[i].owner != -1){
             if(!player.occupiedCities.has(i)){
-                hexagon.changeTextColor("red");
+                hexagon.changeColor("0xff0000");
             }
         }
         else
-            hexagon.changeTextColor("black");
+            hexagon.changeTextColor("white");
     });
 
     console.log(player);
