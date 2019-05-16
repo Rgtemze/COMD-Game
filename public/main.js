@@ -40,8 +40,9 @@ class CityClient{
     }
 }
 
+const grayColor = 0xc5c8cc;
 let instructionIndex = 0;
-let instructions = ["Select only one of the cities that are in bold.", "Click on the promises that you want to invest as much as you want",
+let instructions = ["Select only one of the cities whose texts are in white.", "Click on the promises that you want to invest as much as you want",
                         "Click Ready when you are ready!"]
 const promisesDict = ["🎓", "🏥", "🚋"];
 let investment = new Investment();
@@ -62,7 +63,7 @@ let rulesText = new PIXI.Text("?", {"fontSize": '40px', "fontWeight": 'bold'});
 let instructionsText = new PIXI.Text("Instruction: " + instructions[instructionIndex], {"fontSize": "20px"});
 let rules = "Each of your promises are counted as 1 point,\nwhile each primary promise that you invested are counted as 2 points"
             + "\n\nTotal point is used to determine who acquired the city"
-            + "\n\nCities that you can invest on are in bold"
+            + "\n\nCities that you can invest on are in white text"
             + "\n\nYour cities are colored in green" 
             + "\n\nOpponent cities are colored in red"
             + "\n\nIf you want to invest on a city, then you must have acquired a city in the outer circle"
@@ -89,6 +90,10 @@ function initUI(){
         
         setButtonActive(false);
     });
+    button.x = window.innerWidth * 0.21;
+    button.y = window.innerHeight * 0.13;
+    button.anchor.set(0.5);
+    button.style.fontSize = "45px";
 
     eduText.x = window.innerWidth * 0.13;
     eduText.y = window.innerHeight * 0.4;
@@ -103,7 +108,7 @@ function initUI(){
     app.stage.addChild(transportText);
 
     selectionText.x = window.innerWidth / 2;
-    selectionText.y = 630;
+    selectionText.y = window.innerHeight * 0.05;
     selectionText.anchor.set(0.5);
     app.stage.addChild(selectionText);
 
@@ -129,7 +134,7 @@ function initUI(){
     app.stage.addChild(rulesText);
 
     instructionsText.x = window.innerWidth / 2;
-    instructionsText.y = window.innerHeight * 0.05;
+    instructionsText.y = window.innerHeight * 0.85;
     instructionsText.anchor.set(0.5);
     blinkInstruction();
     app.stage.addChild(instructionsText);
@@ -231,7 +236,6 @@ function setButtonActive(isActive){
 function resetColor(){
     hexagons.forEach((hexagon, i) =>{
         if(!player.occupiedCities.has(i) && cityOwnerShips[i].owner == -1){
-            hexagon.changeTextColor("white");
             hexagon.changeColor(0xc5c8cc);
         }
     });
@@ -266,6 +270,7 @@ function initMapView(data){
         hexagon.basicText.anchor.set(0.5);
         hexagon.basicText.y = 0;
         hexagon.basicText.style.fill = "white";
+        hexagon.basicText.style.fontWeight = "bold";
         if(i < 8){
             hexagon.x = map.x + 280 + 215 * (Math.cos(Math.PI / 4 * i - Math.PI / 8));
             hexagon.y = map.y + 280 + 215 * (Math.sin(Math.PI / 4 * i - Math.PI / 8));
@@ -300,7 +305,7 @@ function initMapView(data){
             resetUI();
             if(!canGo(i)){
                 investment.selectedCity = -1;
-                selectionText.text = "You cannot invest on that city!\nTo invest you should acquire at least one of the following cities:\n";
+                selectionText.text = "To be able to invest on that city you should acquire at least one of the following cities:\n";
                 let preRequisities = getPrerequisities(i);
                 let necessaryCities = "";
                 preRequisities.forEach((cityId) => {
@@ -489,7 +494,7 @@ socket.on('results ready', (outcome) => {
             }
         }
         else
-            hexagon.changeTextColor("white");
+            hexagon.changeColor(grayColor);
     });
 
     console.log(player);
@@ -534,9 +539,11 @@ function setActiveColorInvestmentTexts(isActive){
 function boldAcquirable(){
     hexagons.forEach((hexagon, i) => {
         if(canGo(i)){
-            hexagon.basicText.style.fontStyle = "bold";
+            //hexagon.basicText.style.fontStyle = "bold";
+            hexagon.changeTextColor("white");
         } else {
-            hexagon.basicText.style.fontStyle = "normal";    
+            //hexagon.basicText.style.fontStyle = "normal";    
+            hexagon.changeTextColor("black");
         }
     });
 }
