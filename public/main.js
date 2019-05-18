@@ -44,20 +44,19 @@ const grayColor = 0xc5c8cc;
 let instructionIndex = 0;
 let instructions = ["Select only one of the cities whose texts are in white.", "Click on the promises that you want to invest as much as you want",
                         "Click Ready when you are ready!"]
-const promisesDict = ["🎓", "🏥", "🚋"];
+const promisesDict = ["education", "health", "transport"];// \uf19d \uf0f8 \uf207
 let investment = new Investment();
 let button = new PIXI.Text("Ready");
 let player = new Player("Ziya", "Erkoc");
-let eduText = new PIXI.Text("🎓 Promises Left: " + player.promisesLeft[0]);
-let healthText = new PIXI.Text("🏥 Promises Left: " + player.promisesLeft[1]);
-let transportText = new PIXI.Text("🚋 Promises Left: " + player.promisesLeft[2]);
+let eduText = new PIXI.Text("      Promises Left: " + player.promisesLeft[0]);
+let healthText = new PIXI.Text("      Promises Left: " + player.promisesLeft[1]);
+let transportText = new PIXI.Text("      Promises Left: " + player.promisesLeft[2]);
 let selectionText = new PIXI.Text("You did not select any city!", {"fontSize" : "22px"});
-var envelope = new PIXI.Text('\uf003', {        fill: '#ffffff﻿',        font: '12px fontawesome'    ﻿﻿}); ﻿   app.stage.addChild(envelope);
-app.stage.addChild(envelope);
+let promiseInfoText = new PIXI.Text("");
 
 let turnText = new PIXI.Text("Turn # 1");
 let playerText = new PIXI.Text("You are Player # -1");
-let popText = new PIXI.Text("Total 🗳️: " + 0 + "K");
+let popText = new PIXI.Text("Total Vote: " + 0 + "K");
 let gameStatText = new PIXI.Text("");
 let rulesText = new PIXI.Text("?", {"fontSize": '40px', "fontWeight": 'bold'});
 let instructionsText = new PIXI.Text("Instruction: " + instructions[instructionIndex], {"fontSize": "20px"});
@@ -95,16 +94,55 @@ function initUI(){
     button.anchor.set(0.5);
     button.style.fontSize = "45px";
 
+    let eduSpriteInfo = new PIXI.Sprite(PIXI.Texture.from('icons/education.png'));
+    let healthSpriteInfo = new PIXI.Sprite(PIXI.Texture.from('icons/health.png'));
+    let transportSpriteInfo = new PIXI.Sprite(PIXI.Texture.from('icons/transport.png'));
+
+    eduSpriteInfo.scale.set(0.5)
+    healthSpriteInfo.scale.set(0.5)
+    transportSpriteInfo.scale.set(0.5)
+
+    eduSpriteInfo.x = 5;
+    healthSpriteInfo.x = 65;
+    transportSpriteInfo.x = 125;
+
+    eduSpriteInfo.y = 25;
+    healthSpriteInfo.y = 25;
+    transportSpriteInfo.y = 25;
+
+    promiseInfoText.text = "";
+    promiseInfoText.visible = false;
+    promiseInfoText.x = window.innerWidth * 0.7;
+    promiseInfoText.y = window.innerHeight * 0.15;
+    promiseInfoText.addChild(eduSpriteInfo);
+    promiseInfoText.addChild(healthSpriteInfo);
+    promiseInfoText.addChild(transportSpriteInfo);
+    app.stage.addChild(promiseInfoText);
+
+    let eduSprite = new PIXI.Sprite(PIXI.Texture.from('icons/education.png'));
+    eduSprite.scale.set(0.5);
+
     eduText.x = window.innerWidth * 0.13;
     eduText.y = window.innerHeight * 0.4;
+    eduText.addChild(eduSprite);
     app.stage.addChild(eduText);
+
+    let healthSprite = new PIXI.Sprite(PIXI.Texture.from('icons/health.png'));
+    healthSprite.scale.set(0.5);
 
     healthText.x = window.innerWidth * 0.13;
     healthText.y = eduText.y + 50;
+    healthText.addChild(healthSprite);
     app.stage.addChild(healthText);
+
+    let transportSprite = new PIXI.Sprite(PIXI.Texture.from('icons/transport.png'));
+    transportSprite.scale.set(0.5);
+
 
     transportText.x = window.innerWidth * 0.13;
     transportText.y = eduText.y + 100;
+    transportText.addChild(transportSprite);
+    
     app.stage.addChild(transportText);
 
     selectionText.x = window.innerWidth / 2;
@@ -180,7 +218,9 @@ function initUI(){
 
             player.promisesLeft[index]--;
             investment.promise[index]++;
-            selectionText.text = `You are investing ${investment.promise[0]} 🎓, ${investment.promise[1]} 🏥, ${investment.promise[2]} 🚋 on ${cities[investment.selectedCity].name}`;
+            selectionText.text = `You are on ${cities[investment.selectedCity].name}`;
+            promiseInfoText.text = `Current investment\n      ${investment.promise[0]}      ${investment.promise[1]}      ${investment.promise[2]} `;
+            promiseInfoText.visible = true;
             resetUI();
         })
     })
@@ -220,7 +260,7 @@ function updateInstruction(){
 }
 
 function updateVoteText(){
-    popText.text = "Total 🗳️: " + player.totalPop + "K";
+    popText.text = "Total Vote: " + player.totalPop + "K";
 }
 
 function setButtonActive(isActive){
@@ -264,32 +304,43 @@ function initMapView(data){
         cityOwnerShips.push({owner: -1});
         cities.push(new CityClient(i, data[i].name, data[i].primaryPromise, data[i].population));
         hexagon.anchor.set(0.5);
+        hexagon.scale.set(1, 1);
+
+        hexagon.interactive = true;
+        hexagon.tint = 0xc5c8cc;
         
-        hexagon.basicText = new PIXI.Text(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K 🗳️`, {'font': "16px"});
-        hexagon.basicText.x = 0;
+        hexagon.basicText = new PIXI.Text(`${cities[i].name}\n${cities[i].population}K 🗳️`, {'font': "16px"});
+        hexagon.basicText.x = -10;
         hexagon.basicText.anchor.set(0.5);
         hexagon.basicText.y = 0;
         hexagon.basicText.style.fill = "white";
         hexagon.basicText.style.fontWeight = "bold";
+
+        
+        let primSprite = new PIXI.Sprite(PIXI.Texture.from(`icons/${promisesDict[cities[i].primary]}.png`));
+        primSprite.x = -15;
+        primSprite.y = 50;
+        primSprite.anchor.set(0.5);
+        primSprite.tint = 0xc5c8cc;
+        primSprite.scale.set(0.6);
+        hexagon.addChild(primSprite);
         if(i < 8){
             hexagon.x = map.x + 280 + 215 * (Math.cos(Math.PI / 4 * i - Math.PI / 8));
             hexagon.y = map.y + 280 + 215 * (Math.sin(Math.PI / 4 * i - Math.PI / 8));
             hexagon.rotation = Math.PI / 4 * i + Math.PI * 0.735;
-            //hexagon.basicText.rotation = Math.PI / 3.7 * i;
         } else if(i < 12){
             hexagon.x = map.x + 280 + 120 * (Math.cos(Math.PI / 2 * i - Math.PI / 8));
             hexagon.y = map.y + 280 + 120 * (Math.sin(Math.PI / 2 * i - Math.PI / 8));
             hexagon.rotation = Math.PI / 2 * i + Math.PI * 0.87;
+            primSprite.x = 10; 
+            primSprite.y = 60; 
         } else {
             hexagon.x = map.x + 280;
             hexagon.y = map.y + 280;
-            
         }
-        hexagon.interactive = true;
-        hexagon.tint = 0xc5c8cc;
         hexagon.basicText.rotation = -(hexagon.rotation);//Math.PI / 0.6;
-        hexagon.basicText.x = 0;
-        hexagon.basicText.y = 0;
+        primSprite.rotation = -(hexagon.rotation);
+
 
         hexagon.changeText = (text) => (hexagon.basicText.text = text);
         hexagon.changeTextColor = (color) => (hexagon.basicText.style.fill = color);
@@ -306,6 +357,8 @@ function initMapView(data){
             if(!canGo(i)){
                 investment.selectedCity = -1;
                 selectionText.text = "To be able to invest on that city you should acquire at least one of the following cities:\n";
+                promiseInfoText.visible = false;
+
                 let preRequisities = getPrerequisities(i);
                 let necessaryCities = "";
                 preRequisities.forEach((cityId) => {
@@ -327,7 +380,9 @@ function initMapView(data){
             if(player.occupiedCities.has(i)){
                 investment.isOwn = true;
                 let promises = player.occupiedCities.get(i);
-                selectionText.text = `You had invested ${promises[0]} 🎓, ${promises[1]} 🏥, ${promises[2]} 🚋 on ${cities[i].name}`;
+                selectionText.text = `You own ${cities[i].name}`;
+                promiseInfoText.text = `Committed investments\n      ${promises[0]}      ${promises[1]}      ${promises[2]} `;
+                promiseInfoText.visible = true;
                 setActiveColorInvestmentTexts(false);
                 button.text = "Give Up City";
             } else {
@@ -335,8 +390,10 @@ function initMapView(data){
                 if(cityOwnerShips[i].owner == -1){
                     hexagon.changeColor(0x0000ff);
                 }
-                selectionText.text = `You are investing ${investment.promise[0]} 🎓, ${investment.promise[1]} 🏥, ${investment.promise[2]} 🚋 on ${cities[i].name}`;
+                selectionText.text = `You are on ${cities[i].name}`;
                 button.text = "Ready";
+                promiseInfoText.text = `Current investment\n      ${investment.promise[0]}      ${investment.promise[1]}      ${investment.promise[2]} `;
+                promiseInfoText.visible = true;
             }
         });
         app.stage.addChild(hexagon);
@@ -398,9 +455,9 @@ function getPrerequisities(to){
 }
 
 function resetUI(){
-    eduText.text = "🎓 Promises Left: " + player.promisesLeft[0];
-    healthText.text = "🏥 Promises Left: " + player.promisesLeft[1];
-    transportText.text = "🚋 Promises Left: " + player.promisesLeft[2];   
+    eduText.text = "      Promises Left: " + player.promisesLeft[0];
+    healthText.text = "      Promises Left: " + player.promisesLeft[1];
+    transportText.text = "      Promises Left: " + player.promisesLeft[2];   
 }
 
 
@@ -442,10 +499,10 @@ socket.on('results ready', (outcome) => {
     // Change the texts
     hexagons.forEach((hexagon, i) => {
         if(cityOwnerShips[i].owner != -1){
-            hexagon.changeText(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K 🗳️\n${cityOwnerShips[i].score} pts`);
+            hexagon.changeText(`${cities[i].name}\n${cities[i].population}K 🗳️\n${cityOwnerShips[i].score} pts`);
         }
         else
-            hexagon.changeText(`${cities[i].name}\n${promisesDict[cities[i].primary]}\n${cities[i].population}K 🗳️`);
+            hexagon.changeText(`${cities[i].name}\n${cities[i].population}K 🗳️`);
         if(capturedCity == -1 && cityOwnerShips[i].owner == player.id && !player.occupiedCities.has(i) ){
             capturedCity = i;
         }
