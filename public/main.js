@@ -86,7 +86,8 @@ function initUI(){
         investment.selectedCity = -1;
         selectionText.text = "Waiting for the opponents' turn!";
         investment.promise = [0, 0, 0];
-        
+        promiseInfoText.visible = false;
+
         setButtonActive(false);
     });
     button.x = window.innerWidth * 0.21;
