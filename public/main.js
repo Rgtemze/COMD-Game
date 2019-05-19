@@ -497,7 +497,7 @@ socket.on("game over", (text) => {
 });
 
 socket.on("server full", () => {
-    alert("Server is Full (Max. 2 players)");
+    //alert("");
 });
 
 socket.on("refresh", () => {
