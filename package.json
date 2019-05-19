@@ -21,5 +21,9 @@
   "bugs": {
     "url": "https://github.com/Rgtemze/COMD-Game/issues"
   },
-  "homepage": "https://github.com/Rgtemze/COMD-Game#readme"
+  "homepage": "https://github.com/Rgtemze/COMD-Game#readme",
+  "dependencies": {
+    "socket.io": "latest",
+    "express": "latest"
+  }
 }
