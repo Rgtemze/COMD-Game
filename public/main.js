@@ -74,7 +74,7 @@ let cityOwnerShips = [];
 let cities = [];
 let investmentTexts = [];
 
-let resetButton = new PIXI.Text("Reset (Click once then Refresh both pages)", {"fontSize": "15px"});
+let resetButton = new PIXI.Text("Reset (Click once)", {"fontSize": "15px"});
 resetButton.interactive = true;
 resetButton.on('mousedown', () => {
     socket.emit('reset');
