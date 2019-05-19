@@ -60,6 +60,7 @@ let popText = new PIXI.Text("Total Vote: " + 0 + "K");
 let gameStatText = new PIXI.Text("");
 let rulesText = new PIXI.Text("?", {"fontSize": '40px', "fontWeight": 'bold'});
 let instructionsText = new PIXI.Text("Instruction: " + instructions[instructionIndex], {"fontSize": "20px"});
+
 let rules = "Each of your promises are counted as 1 point,\nwhile each primary promise that you invested are counted as 2 points"
             + "\n\nTotal point is used to determine who acquired the city"
             + "\n\nCities that you can invest on are in white text"
@@ -72,6 +73,14 @@ let cityOwnerShips = [];
 
 let cities = [];
 let investmentTexts = [];
+
+let resetButton = new PIXI.Text("Reset (Click once then Refresh both pages)", {"fontSize": "15px"});
+resetButton.interactive = true;
+resetButton.on('mousedown', () => {
+    socket.emit('reset');
+});
+app.stage.addChild(resetButton);
+
 function initUI(){
     button.interactive = true;
     button.on('mousedown', () => {
@@ -487,6 +496,14 @@ socket.on("game over", (text) => {
     selectionText.text = text;
 });
 
+socket.on("server full", () => {
+    alert("Server is Full (Max. 2 players)");
+});
+
+socket.on("refresh", () => {
+    window.history.go(0);
+});
+
 socket.on('results ready', (outcome) => {
     gameStatText.text = "Turn Results:\n";
     let capturedCity = -1;
@@ -561,8 +578,8 @@ socket.on('results ready', (outcome) => {
 
     if(outcome.turnNo == 10){
         socket.emit('inform population', {id: player.id, totalPop: player.totalPop});
+        setButtonActive(false);
     }
-    
     boldAcquirable();
 })
 

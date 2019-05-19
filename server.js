@@ -11,8 +11,16 @@ app.get('/', function(req, res){
 });
 io.on('connection', function(socket){
 
+
+    
     socket.on('new user', (data => {
         let player = new PlayerData(data.name, data.surname, gc.playerNo);
+
+        if(gc.playerNo == gc.totalPlayerCount){
+            socket.emit("server full");
+            return;
+        }
+        console.log(gc.playerNo);
 
         let primaries = [];
         let populations = [];
@@ -30,6 +38,11 @@ io.on('connection', function(socket){
         
         gc.processInvestment(data);
         
+    });
+
+    socket.on('reset', () => {
+        gc = new GameController();
+        io.sockets.emit("refresh");
     });
 
     socket.on('inform population', data => {
