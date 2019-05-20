@@ -247,7 +247,9 @@ class GameController{
                 lostInfo.cities.forEach(city =>{
                     let cityId = city.cityId;
                     console.log("Checking " + cityId + "for further lost cities")
-                    
+                    if(cityId == 12){
+                        return;
+                    }
                     let cityObj = this.cities[cityId];
                     let rightCityObj = this.cities[cityObj.getRightNeighbour()];
                     let rightRightCityObj = this.cities[this.cities[cityObj.getRightNeighbour()].getRightNeighbour()];
