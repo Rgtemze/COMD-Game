@@ -232,7 +232,7 @@ function blinkPromises(){
     console.log("Blinking promise");
     let i = 0;
     let interval = setInterval(()=>{
-        if(i++ == 1){
+        if(i++ == 3){
             clearInterval(interval);
         }
         eduText.style.fill = (eduText.style.fill == "black") ? "red" : "black";
@@ -296,7 +296,7 @@ function initMapView(data){
         hexagon.interactive = true;
         hexagon.tint = 0xc5c8cc;
         
-        hexagon.basicText = new PIXI.Text(`${cities[i].name}\n${cities[i].population}K 🗳️`, {'font': "16px"});
+        hexagon.basicText = new PIXI.Text(`${cities[i].name}\n${cities[i].population}K`, {'font': "16px"});
         hexagon.basicText.x = -10;
         hexagon.basicText.anchor.set(0.5);
         hexagon.basicText.y = 0;
@@ -494,10 +494,10 @@ socket.on('results ready', (outcome) => {
     // Change the texts
     hexagons.forEach((hexagon, i) => {
         if(cityOwnerShips[i].owner != -1){
-            hexagon.changeText(`${cities[i].name}\n${cities[i].population}K 🗳️\n${cityOwnerShips[i].score} pts`);
+            hexagon.changeText(`${cities[i].name}\n${cities[i].population}K\n${cityOwnerShips[i].score} pts`);
         }
         else
-            hexagon.changeText(`${cities[i].name}\n${cities[i].population}K 🗳️`);
+            hexagon.changeText(`${cities[i].name}\n${cities[i].population}K`);
         if(capturedCity == -1 && cityOwnerShips[i].owner == player.id && !player.occupiedCities.has(i) ){
             capturedCity = i;
         }

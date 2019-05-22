@@ -10,25 +10,26 @@
     </head>
     <body>
 
-    <!-- Large modal -->
     <button type="button" class="btn btn-outline-danger" onclick="socket.emit('reset');">Reset</button>
 
-    <!-- Button trigger modal -->
-<button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#exampleModal">
+    <!-- Rules modal -->
+    <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#rulesModal">
         Rules
       </button>
       
       <!-- Modal -->
-      <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal fade" id="rulesModal" tabindex="-1" role="dialog" aria-labelledby="rulesModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Rules</h5>
+              <h5 class="modal-title" id="rulesModalLabel">Rules</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
             <div class="modal-body">
+                Note that in the first turn, instructions located below the game map will guide you.
+                <hr>    
                 There are three types of promises: Education, Health and Transportation.
                 <br><br> Each city has a primary promise whose icon is shown inside the city.
                 <br><br> Each city has a population amount.
@@ -48,7 +49,45 @@
           </div>
         </div>
       </div>
-    <script src="/socket.io/socket.io.js"></script>
+ <!-- Button trigger modal -->
+ <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#exampleModal">
+    Description
+   </button>
+   
+   <!-- Modal -->
+   <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+     <div class="modal-dialog" role="document">
+       <div class="modal-content">
+         <div class="modal-header">
+           <h5 class="modal-title" id="exampleModalLabel">Description</h5>
+           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+             <span aria-hidden="true">&times;</span>
+           </button>
+
+         </div>
+         <div class="modal-body">
+            
+            Take your place in the “Prevalence”. There is no injustice in this game, no advantageous campaigns. Each player is <b>equal</b>, promises are limited, needs of the cities are determined. 
+           There is only one randomness in this game:  <b>you and your strategies</b>. Use your promise cards to reach the victory. 
+           There is no rule to restrict your promise choices in the game, there is <b>no concrete paths</b> to reach the victory.  However, do not forget that each decision is important and you should optimize the number of cards you give up. Do not trust yourself and the cities you have taken until the game ends. 
+           There is <b>no mercy</b> in this game as there is no mercy in the real elections. 
+           To win, you must consider both the cities you have taken and the cities you want to take at every round.  You can lose suddenly or you can have the first place by proper strategies in a few rounds. This is not chess, however, to win, one must play Prevalence as if one plays the chess. Not only the current ownerships are important, also a wise politician should consider the future. 
+            <b>Do not stop planning.</b>
+
+            <br>In 10 rounds, the winner will be known. In this game, there are only strategies well planned, mistaken moves taken 
+            and there is only one winner at the end. At last, the only purpose is to <b>PREVAIL</b>.
+         </div>
+         <div class="modal-footer">
+           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+         </div>
+       </div>
+     </div>
+   </div>
+
+
+
+
+      <script src="/socket.io/socket.io.js"></script>
     <script src='/main.js'></script>
     </body>
 </html>
