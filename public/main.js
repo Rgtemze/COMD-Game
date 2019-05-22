@@ -58,7 +58,6 @@ let turnText = new PIXI.Text("Turn # 1");
 let playerText = new PIXI.Text("You are Player # -1");
 let popText = new PIXI.Text("Total Vote: " + 0 + "K");
 let gameStatText = new PIXI.Text("");
-let rulesText = new PIXI.Text("?", {"fontSize": '40px', "fontWeight": 'bold'});
 let instructionsText = new PIXI.Text("Instruction: " + instructions[instructionIndex], {"fontSize": "20px"});
 
 let rules = "Each of your promises are counted as 1 point,\nwhile each primary promise that you invested are counted as 2 points"
@@ -74,12 +73,6 @@ let cityOwnerShips = [];
 let cities = [];
 let investmentTexts = [];
 
-let resetButton = new PIXI.Text("Reset (Click once)", {"fontSize": "15px"});
-resetButton.interactive = true;
-resetButton.on('mousedown', () => {
-    socket.emit('reset');
-});
-app.stage.addChild(resetButton);
 
 function initUI(){
     button.interactive = true;
@@ -176,10 +169,6 @@ function initUI(){
     gameStatText.y = turnText.y + 150;
     app.stage.addChild(gameStatText);
 
-    rulesText.x = 660;
-    rulesText.y = 50;
-    rulesText.interactive = true;
-    app.stage.addChild(rulesText);
 
     instructionsText.x = window.innerWidth / 2;
     instructionsText.y = window.innerHeight * 0.85;
@@ -196,18 +185,6 @@ function initUI(){
     rect.drawRect(750, 50, 500, window.innerHeight);
     app.stage.addChild(rect);
     rect.height = 0; 
-    rulesText.on('mouseover', (event) => {
-        rulesText.text = rules;
-        rulesText.style.backgroundColor = "white";
-        rulesText.style.fontSize = "20px";
-        rect.height = window.innerHeight;
-    });
-    app.stage.addChild(rulesText);
-    rulesText.on('mouseout', (event) => {
-        rulesText.text = "?";
-        rulesText.style.fontSize = "40px";
-        rect.height = 0;
-    });
 
 
 
